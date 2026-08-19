@@ -1,0 +1,138 @@
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+
+@import 'tailwindcss';
+
+/*
+  A dense, professional register: small type, tight rhythm, hairline borders instead of shadows.
+  Colour is reserved almost entirely for risk meaning — a screen where everything is coloured
+  communicates nothing.
+
+  IBM Plex Sans and IBM Plex Sans Arabic share a designer and matched metrics, so switching
+  locale does not change the proportions of the interface.
+*/
+
+@theme {
+  --font-sans:
+    'IBM Plex Sans Variable', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+
+  /* Neutral base, very slightly cool. */
+  --color-canvas: oklch(0.985 0.002 265);
+  --color-surface: oklch(1 0 0);
+  --color-surface-muted: oklch(0.972 0.003 265);
+  --color-border-subtle: oklch(0.9 0.004 265);
+  --color-border-strong: oklch(0.83 0.006 265);
+
+  --color-ink: oklch(0.22 0.01 265);
+  --color-ink-muted: oklch(0.5 0.012 265);
+  --color-ink-subtle: oklch(0.62 0.01 265);
+
+  --color-accent: oklch(0.52 0.13 250);
+  --color-accent-hover: oklch(0.46 0.14 250);
+  --color-accent-ink: oklch(0.99 0 0);
+
+  /* The risk band scale. Sequential, so severity reads as intensity rather than as category. */
+  --color-band-low: oklch(0.55 0.13 155);
+  --color-band-low-bg: oklch(0.95 0.03 155);
+  --color-band-moderate: oklch(0.55 0.11 85);
+  --color-band-moderate-bg: oklch(0.96 0.04 85);
+  --color-band-high: oklch(0.55 0.16 45);
+  --color-band-high-bg: oklch(0.95 0.04 45);
+  --color-band-critical: oklch(0.5 0.2 22);
+  --color-band-critical-bg: oklch(0.94 0.035 22);
+
+  /* Report status. Distinct hues, deliberately quieter than the band scale. */
+  --color-status-submitted: oklch(0.5 0.09 250);
+  --color-status-inreview: oklch(0.5 0.11 85);
+  --color-status-resolved: oklch(0.5 0.1 155);
+
+  --color-danger: oklch(0.5 0.2 22);
+  --color-danger-bg: oklch(0.95 0.03 22);
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+
+  --radius-sm: 0.1875rem;
+  --radius-md: 0.3125rem;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  /* Tabular figures keep score columns aligned, which matters in a dense table. */
+  table,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Arabic sits slightly small against Latin at the same size; nudge it back to parity. */
+  [dir='rtl'] body {
+    font-size: calc(var(--text-base) * 1.06);
+  }
+}
+
+/*
+  Print is treated as a report format, not a screenshot of the app: navigation and controls are
+  dropped, cards are kept whole across page breaks, and colour is forced through so risk bands
+  still read correctly on paper.
+*/
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  header,
+  nav,
+  button {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    font-size: 11pt;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Cards should not be split down the middle by a page break. */
+  [class*="rounded-md"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
