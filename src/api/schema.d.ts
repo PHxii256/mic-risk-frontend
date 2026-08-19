@@ -79,10 +79,6 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Exchanges the refresh cookie for a new access token and a rotated refresh cookie.
-         *     Anonymous by design: the caller reaches here precisely because its access token has expired.
-         */
         post: {
             parameters: {
                 query?: never;
@@ -131,10 +127,6 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Revokes the whole token family behind the current refresh cookie and clears it.
-         *     Anonymous so that signing out still works once the access token has expired.
-         */
         post: {
             parameters: {
                 query?: never;
@@ -166,7 +158,6 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The authenticated caller's own profile and roles, without minting a new token. */
         get: {
             parameters: {
                 query?: never;
@@ -217,10 +208,6 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Changes the password, then signs every other device out and re-establishes the current
-         *     session, so the caller stays logged in here but stolen sessions elsewhere die.
-         */
         post: {
             parameters: {
                 query?: never;
@@ -766,10 +753,6 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Sets a new password for an employee who cannot sign in. There is no self-service reset,
-         *     so this is the only recovery path for a forgotten password.
-         */
         post: {
             parameters: {
                 query?: never;
@@ -1755,11 +1738,6 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /**
-         * Revises an auditor evaluation that already exists. Separate from the POST that creates
-         *     one, so that creating twice stays an error rather than silently overwriting an
-         *     assessment another auditor made.
-         */
         put: {
             parameters: {
                 query?: never;
@@ -2278,21 +2256,11 @@ export interface components {
             inherentRiskMatrix: components["schemas"]["InherentRiskMatrixDto"];
             residualRiskBands: components["schemas"]["ResidualRiskBandDto"][];
         };
-        /**
-         * @description Everything the client needs to run an authenticated session, returned by login, refresh
-         *     and change-password alike so the SPA has one code path for establishing a session.
-         *     The refresh token is deliberately absent: it travels only in an HttpOnly cookie.
-         */
         AuthResponseDto: {
             accessToken: string;
             /** Format: date-time */
             accessTokenExpiresAt: string;
             roles: string[];
-            /**
-             * @description The caller's own employee profile. Its `id` is the value the API expects in the
-             *     `empId` / `uploadedByEmpId` fields of request bodies, so the client never has
-             *     to enumerate employees to discover who it is.
-             */
             employee: components["schemas"]["EmployeeResponseDto"];
         };
         ChangePasswordDto: {
@@ -2355,10 +2323,10 @@ export interface components {
             description: string;
         };
         CreateRiskSubcategoryRequestDto: {
-            name: string;
+            nameEn: string;
+            nameAr: string;
             category: string;
         };
-        /** @description The authenticated caller, without minting anything new. */
         CurrentUserDto: {
             roles: string[];
             employee: components["schemas"]["EmployeeResponseDto"];
@@ -2419,7 +2387,6 @@ export interface components {
         };
         /** Format: binary */
         IFormFile: string;
-        /** @description Open risks plotted on the 5x5 severity-by-frequency grid, before controls. */
         InherentRiskMatrixDto: {
             cells: components["schemas"]["RiskMatrixCellDto"][];
         };
@@ -2480,11 +2447,9 @@ export interface components {
             viewed: boolean;
             surveyCompleted: null | boolean;
         };
-        /** @description An administrator setting a new password for an employee who cannot sign in. */
         ResetPasswordDto: {
             newPassword: string;
         };
-        /** @description Open risks counted per residual band, so the effect of controls is visible. */
         ResidualRiskBandDto: {
             band: string;
             /** Format: int32 */
@@ -2502,12 +2467,6 @@ export interface components {
             /** Format: date-time */
             completedAt: null | string;
         };
-        /**
-         * @description Engagement for one resource, counted over the people it is actually aimed at.
-         *     Administrators curate the library rather than consume it, so they are excluded from both
-         *     the count and the denominator — otherwise every resource would look permanently
-         *     under-read by however many admins exist.
-         */
         ResourceEngagementStatsDto: {
             /** Format: int64 */
             resourceId: number | string;
@@ -2556,7 +2515,8 @@ export interface components {
             dueThisWeekCount: number | string;
         };
         RiskCategoryResponseDto: {
-            name: string;
+            nameEn: string;
+            nameAr: string;
             riskSubcategories: components["schemas"]["RiskSubcategoryDto"][];
         };
         RiskMatrixCellDto: {
@@ -2614,12 +2574,14 @@ export interface components {
         RiskSubcategoryDto: {
             /** Format: int64 */
             id: number | string;
-            name: string;
+            nameEn: string;
+            nameAr: string;
         };
         RiskSubcategoryResponseDto: {
             /** Format: int64 */
             id: number | string;
-            name: string;
+            nameEn: string;
+            nameAr: string;
             category: string;
         };
         UpdateEmployeeRequestDto: {
@@ -2641,7 +2603,8 @@ export interface components {
             newStatus: string;
         };
         UpdateRiskSubcategoryRequestDto: {
-            name: string;
+            nameEn: string;
+            nameAr: string;
             category: string;
         };
     };

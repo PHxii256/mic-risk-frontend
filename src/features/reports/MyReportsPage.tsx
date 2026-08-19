@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router' 
 
 import { RiskScore, StatusBadge } from '@/components/app/RiskBadge'
 import { EmptyState, StateBoundary } from '@/components/app/StateBoundary'
@@ -14,7 +14,8 @@ import { useMyReports } from './hooks/queries'
 export function MyReportsPage() {
   const { t, i18n } = useTranslation()
   const query = useMyReports()
-
+  const navigate = useNavigate()
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -32,7 +33,12 @@ export function MyReportsPage() {
         onRetry={() => void query.refetch()}
         skeleton={<TableSkeleton />}
         isEmpty={(reports) => reports.length === 0}
-        empty={<EmptyState message={t('state.emptyReports')} />}
+        empty={
+          <EmptyState
+            message={t('state.emptyReports')}
+            onClick={() => void navigate('/reports/new')} // 3. Use navigate here
+          />
+        }
       >
         {(reports) => <ReportsTable reports={reports} locale={i18n.language} />}
       </StateBoundary>
@@ -71,7 +77,7 @@ function ReportsTable({ reports, locale }: { reports: RiskReport[]; locale: stri
                     {truncate(report.description)}
                   </Link>
                 </Td>
-                <Td className="text-ink-muted">{report.subCategory.name}</Td>
+                <Td className="text-ink-muted">{report.subCategory.nameEn}</Td>
                 <Td>
                   <RiskScore
                     score={report.effectiveEvaluation.inherentRisk}

@@ -499,9 +499,9 @@ export function useCategories() {
       )
 
       return data.map((group) => ({
-        category: group.name,
+        category: group.nameEn,
         subcategories: group.riskSubcategories.map((sub) =>
-          mapSubcategory({ id: sub.id, name: sub.name, category: group.name }),
+          mapSubcategory({ id: sub.id,nameAr :sub.nameAr, nameEn: sub.nameEn, category: group.nameEn }),
         ),
       }))
     },
@@ -514,8 +514,8 @@ export function useSaveSubcategory() {
 
   return useMutation({
     mutationKey: ['taxonomy', 'save'],
-    mutationFn: async (input: { id?: number; name: string; category: string }) => {
-      const body = { name: input.name, category: input.category }
+    mutationFn: async (input: { id?: number; nameEn: string; nameAr: string; category: string }) => {
+      const body = { nameEn: input.nameEn, nameAr: input.nameAr, category: input.category }
 
       const data =
         input.id === undefined

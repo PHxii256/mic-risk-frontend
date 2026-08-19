@@ -22,9 +22,16 @@ import { useCategories, useDeleteSubcategory, useSaveSubcategory } from './hooks
 
 export function TaxonomyPage() {
   const { t } = useTranslation()
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
   const categories = useCategories()
   const remove = useDeleteSubcategory()
   const [editing, setEditing] = useState<Subcategory | 'new' | null>(null)
+
+  // Check if categories are empty
+  const hasNoCategories = !categories.data || categories.data.length === 0
+  
+  // Hide StateBoundary when editing while no categories exist
+  const hideStateBoundary = Boolean(editing && hasNoCategories)
 
   return (
     <div className="space-y-4">
@@ -43,73 +50,71 @@ export function TaxonomyPage() {
         />
       ) : null}
 
-      <StateBoundary
-        isLoading={categories.isPending}
-        error={categories.error}
-        data={categories.data}
-        onRetry={() => void categories.refetch()}
-        skeleton={
-          <div className="space-y-3">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-        }
-        isEmpty={(groups) => groups.length === 0}
-      >
-        {(groups) => (
-          <div className="grid gap-4 md:grid-cols-2">
-            {groups.map((group) => (
-              <Card key={group.category}>
-                <CardHeader>
-                  <CardTitle>{t(`riskCategory.${group.category}`)}</CardTitle>
-                </CardHeader>
-                <CardBody className="space-y-1">
-                  {group.subcategories.length === 0 ? (
-                    <p className="text-xs text-ink-subtle">{t('state.empty')}</p>
-                  ) : (
-                    group.subcategories.map((sub) => (
-                      <div
-                        key={sub.id}
-                        className="flex items-center justify-between gap-2 border-b border-border-subtle py-1.5 last:border-0"
-                      >
-                        <span className="text-sm">{sub.name}</span>
-                        <div className="flex gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditing(sub)}
-                          >
-                            <Pencil className="size-3.5" aria-hidden="true" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            disabled={remove.isPending}
-                            onClick={() => {
-                              // A soft delete with no way back: the API has no restore endpoint.
-                              if (confirm(t('taxonomy.confirmDelete'))) remove.mutate(sub.id)
-                            }}
-                          >
-                            <Trash2 className="size-3.5" aria-hidden="true" />
-                          </Button>
+      {!hideStateBoundary && (
+        <StateBoundary
+          isLoading={categories.isPending}
+          error={categories.error}
+          data={categories.data}
+          onRetry={() => void categories.refetch()}
+          skeleton={
+            <div className="space-y-3">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          }
+          isEmpty={(groups) => groups.length === 0}
+        >
+          {(groups) => (
+            <div className="grid gap-4 md:grid-cols-2">
+              {groups.map((group) => (
+                <Card key={group.category}>
+                  <CardHeader>
+                    <CardTitle>{t(`riskCategory.${group.category}`)}</CardTitle>
+                  </CardHeader>
+                  <CardBody className="space-y-1">
+                    {group.subcategories.length === 0 ? (
+                      <p className="text-xs text-ink-subtle">{t('state.empty')}</p>
+                    ) : (
+                      group.subcategories.map((sub) => (
+                        <div
+                          key={sub.id}
+                          className="flex items-center justify-between gap-2 border-b border-border-subtle py-1.5 last:border-0"
+                        >
+                          <span className="text-sm">{isRtl ? sub.nameAr : sub.nameEn}</span>
+                          <div className="flex gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditing(sub)}
+                            >
+                              <Pencil className="size-3.5" aria-hidden="true" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={remove.isPending}
+                              onClick={() => {
+                                if (confirm(t('taxonomy.confirmDelete'))) remove.mutate(sub.id)
+                              }}
+                            >
+                              <Trash2 className="size-3.5" aria-hidden="true" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        )}
-      </StateBoundary>
-
-      <p className="text-xs text-ink-subtle">{t('taxonomy.softDeleteNote')}</p>
+                      ))
+                    )}
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          )}
+        </StateBoundary>
+      )}
     </div>
   )
 }
-
 function SubcategoryForm({
   subcategory,
   onClose,
@@ -120,7 +125,9 @@ function SubcategoryForm({
   const { t } = useTranslation()
   const save = useSaveSubcategory()
 
-  const [name, setName] = useState(subcategory?.name ?? '')
+  const [nameEn, setNameEn] = useState(subcategory?.nameEn ?? '')
+  const [nameAr, setNameAr] = useState(subcategory?.nameAr ?? '')
+
   const [category, setCategory] = useState<string>(subcategory?.category ?? RISK_CATEGORIES[0])
 
   return (
@@ -134,18 +141,25 @@ function SubcategoryForm({
           noValidate
           onSubmit={(event) => {
             event.preventDefault()
-            save.mutate({ id: subcategory?.id, name, category }, { onSuccess: onClose })
+            save.mutate({ id: subcategory?.id, nameEn: nameEn,nameAr: nameAr ,  category }, { onSuccess: onClose })
           }}
         >
-          <Field htmlFor="sub-name" label={t('taxonomy.name')} required>
+          <Field htmlFor="sub-name" label={t('taxonomy.nameEn')} required>
             <Input
               id="sub-name"
-              value={name}
+              value={nameEn}
               aria-required="true"
-              onChange={(e) => setName(e.currentTarget.value)}
+              onChange={(e) => setNameEn(e.currentTarget.value)}
             />
           </Field>
-
+          <Field htmlFor="sub-name" label={t('taxonomy.nameAr')} required>
+            <Input
+              id="sub-name"
+              value={nameAr}
+              aria-required="true"
+              onChange={(e) => setNameAr(e.currentTarget.value)}
+            />
+          </Field>
           {/* Constrained by a database check constraint, so it is a fixed list, not free text. */}
           <Field htmlFor="sub-category" label={t('report.category')} required>
             <Select

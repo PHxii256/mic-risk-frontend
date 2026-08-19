@@ -36,11 +36,11 @@ export function StateBoundary<T>({
   return <>{children(data)}</>
 }
 
-export function EmptyState({ message }: { message?: string }) {
+export function EmptyState({ message, onClick }: { message?: string , onClick? : ()=> void}) {
   const { t } = useTranslation()
 
   return (
-    <div className="rounded-md border border-dashed border-border-strong px-4 py-10 text-center">
+    <div className="rounded-md border border-dashed border-border-strong px-4 py-10 text-center" onClick={()=> onClick?.()}>
       <p className="text-sm text-ink-muted">{message ?? t('state.empty')}</p>
     </div>
   )

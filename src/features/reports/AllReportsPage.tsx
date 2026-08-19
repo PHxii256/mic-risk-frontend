@@ -235,7 +235,7 @@ export function AllReportsPage() {
                         {report.reporter.department.name}
                       </span>
                     </Td>
-                    <Td className="text-ink-muted">{report.subCategory.name}</Td>
+                    <Td className="text-ink-muted">{report.subCategory.nameEn}</Td>
                     <Td>
                       <RiskScore
                         score={report.effectiveEvaluation.inherentRisk}

@@ -61,7 +61,7 @@ function ReportDetail({ report }: { report: RiskReport }) {
           <p className="whitespace-pre-wrap text-sm text-ink">{report.description}</p>
 
           <dl className="grid gap-x-6 gap-y-2 text-xs sm:grid-cols-3">
-            <Detail label={t('report.subcategory')} value={report.subCategory.name} />
+            <Detail label={t('report.subcategory')} value={report.subCategory.nameEn} />
             <Detail
               label={t('report.category')}
               value={t(`riskCategory.${report.subCategory.category}`)}

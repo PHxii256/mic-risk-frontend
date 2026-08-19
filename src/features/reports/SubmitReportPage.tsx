@@ -38,6 +38,7 @@ export function SubmitReportPage() {
   const navigate = useNavigate()
   const employeeId = useCurrentEmployeeId()
   const isAdmin = useIsAdmin()
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
 
   const categories = useRiskCategories()
   const createReport = useCreateReport()
@@ -123,7 +124,7 @@ export function SubmitReportPage() {
                     <optgroup key={group.category} label={t(`riskCategory.${group.category}`)}>
                       {group.subcategories.map((sub) => (
                         <option key={sub.id} value={sub.id}>
-                          {sub.name}
+                          {isRtl? sub.nameAr : sub.nameEn}
                         </option>
                       ))}
                     </optgroup>

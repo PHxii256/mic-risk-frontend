@@ -109,7 +109,6 @@
         "tags": [
           "Account"
         ],
-        "summary": "Exchanges the refresh cookie for a new access token and a rotated refresh cookie.\r\nAnonymous by design: the caller reaches here precisely because its access token has expired.",
         "responses": {
           "200": {
             "description": "OK",
@@ -159,7 +158,6 @@
         "tags": [
           "Account"
         ],
-        "summary": "Revokes the whole token family behind the current refresh cookie and clears it.\r\nAnonymous so that signing out still works once the access token has expired.",
         "responses": {
           "204": {
             "description": "No Content"
@@ -172,7 +170,6 @@
         "tags": [
           "Account"
         ],
-        "summary": "The authenticated caller's own profile and roles, without minting a new token.",
         "responses": {
           "200": {
             "description": "OK",
@@ -222,7 +219,6 @@
         "tags": [
           "Account"
         ],
-        "summary": "Changes the password, then signs every other device out and re-establishes the current\r\nsession, so the caller stays logged in here but stolen sessions elsewhere die.",
         "requestBody": {
           "content": {
             "application/json-patch+json": {
@@ -996,7 +992,6 @@
         "tags": [
           "Employee"
         ],
-        "summary": "Sets a new password for an employee who cannot sign in. There is no self-service reset,\r\nso this is the only recovery path for a forgotten password.",
         "parameters": [
           {
             "name": "id",
@@ -2359,8 +2354,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2379,8 +2374,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2491,7 +2486,6 @@
         "tags": [
           "RiskReport"
         ],
-        "summary": "Revises an auditor evaluation that already exists. Separate from the POST that creates\r\none, so that creating twice stays an error rather than silently overwriting an\r\nassessment another auditor made.",
         "parameters": [
           {
             "name": "id",
@@ -2743,8 +2737,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2763,8 +2757,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3130,8 +3124,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3150,8 +3144,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "text/plain": {
                 "schema": {
@@ -3290,11 +3284,9 @@
             }
           },
           "employee": {
-            "description": "The caller's own employee profile. Its `id` is the value the API expects in the\r\n`empId` / `uploadedByEmpId` fields of request bodies, so the client never has\r\nto enumerate employees to discover who it is.",
             "$ref": "#/components/schemas/EmployeeResponseDto"
           }
-        },
-        "description": "Everything the client needs to run an authenticated session, returned by login, refresh\r\nand change-password alike so the SPA has one code path for establishing a session.\r\nThe refresh token is deliberately absent: it travels only in an HttpOnly cookie."
+        }
       },
       "ChangePasswordDto": {
         "required": [
@@ -3546,12 +3538,16 @@
       },
       "CreateRiskSubcategoryRequestDto": {
         "required": [
-          "name",
+          "nameEn",
+          "nameAr",
           "category"
         ],
         "type": "object",
         "properties": {
-          "name": {
+          "nameEn": {
+            "type": "string"
+          },
+          "nameAr": {
             "type": "string"
           },
           "category": {
@@ -3575,8 +3571,7 @@
           "employee": {
             "$ref": "#/components/schemas/EmployeeResponseDto"
           }
-        },
-        "description": "The authenticated caller, without minting anything new."
+        }
       },
       "DepartmentEngagementStatsDto": {
         "required": [
@@ -3816,8 +3811,7 @@
               "$ref": "#/components/schemas/RiskMatrixCellDto"
             }
           }
-        },
-        "description": "Open risks plotted on the 5x5 severity-by-frequency grid, before controls."
+        }
       },
       "LoginDto": {
         "required": [
@@ -4085,8 +4079,7 @@
             "minLength": 8,
             "type": "string"
           }
-        },
-        "description": "An administrator setting a new password for an employee who cannot sign in."
+        }
       },
       "ResidualRiskBandDto": {
         "required": [
@@ -4106,8 +4099,7 @@
             ],
             "format": "int32"
           }
-        },
-        "description": "Open risks counted per residual band, so the effect of controls is visible."
+        }
       },
       "ResourceEngagementResponseDto": {
         "required": [
@@ -4218,8 +4210,7 @@
             ],
             "format": "int32"
           }
-        },
-        "description": "Engagement for one resource, counted over the people it is actually aimed at.\r\nAdministrators curate the library rather than consume it, so they are excluded from both\r\nthe count and the denominator — otherwise every resource would look permanently\r\nunder-read by however many admins exist."
+        }
       },
       "ResourceResponseDto": {
         "required": [
@@ -4354,12 +4345,16 @@
       },
       "RiskCategoryResponseDto": {
         "required": [
-          "name",
+          "nameEn",
+          "nameAr",
           "riskSubcategories"
         ],
         "type": "object",
         "properties": {
-          "name": {
+          "nameEn": {
+            "type": "string"
+          },
+          "nameAr": {
             "type": "string"
           },
           "riskSubcategories": {
@@ -4594,7 +4589,8 @@
       "RiskSubcategoryDto": {
         "required": [
           "id",
-          "name"
+          "nameEn",
+          "nameAr"
         ],
         "type": "object",
         "properties": {
@@ -4606,7 +4602,10 @@
             ],
             "format": "int64"
           },
-          "name": {
+          "nameEn": {
+            "type": "string"
+          },
+          "nameAr": {
             "type": "string"
           }
         }
@@ -4614,7 +4613,8 @@
       "RiskSubcategoryResponseDto": {
         "required": [
           "id",
-          "name",
+          "nameEn",
+          "nameAr",
           "category"
         ],
         "type": "object",
@@ -4627,7 +4627,10 @@
             ],
             "format": "int64"
           },
-          "name": {
+          "nameEn": {
+            "type": "string"
+          },
+          "nameAr": {
             "type": "string"
           },
           "category": {
@@ -4708,12 +4711,16 @@
       },
       "UpdateRiskSubcategoryRequestDto": {
         "required": [
-          "name",
+          "nameEn",
+          "nameAr",
           "category"
         ],
         "type": "object",
         "properties": {
-          "name": {
+          "nameEn": {
+            "type": "string"
+          },
+          "nameAr": {
             "type": "string"
           },
           "category": {

@@ -61,7 +61,8 @@ export interface Employee {
 
 export interface Subcategory {
   id: number
-  name: string
+  nameEn: string
+  nameAr: string
   category: RiskCategory
 }
 
@@ -134,7 +135,8 @@ export function mapEmployee(dto: EmployeeDto): Employee {
 export function mapSubcategory(dto: SubcategoryDto): Subcategory {
   return {
     id: toInteger(dto.id, 'subcategory.id'),
-    name: dto.name,
+    nameEn: dto.nameEn,
+    nameAr: dto.nameAr,
     category: toEnum(dto.category, RISK_CATEGORIES, 'subcategory.category'),
   }
 }

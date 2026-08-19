@@ -124,7 +124,7 @@
   "state": {
     "loading": "Loading…",
     "empty": "Nothing to show",
-    "emptyReports": "You have not submitted any risk reports yet.",
+    "emptyReports": "You have not submitted any risk reports yet. Tap here to submit a risk.",
     "errorTitle": "Something went wrong",
     "retry": "Try again",
     "forbiddenTitle": "You do not have access",
@@ -241,7 +241,8 @@
   "taxonomy": {
     "add": "Add subcategory",
     "edit": "Edit subcategory",
-    "name": "Name",
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
     "confirmDelete": "Deactivate this subcategory? There is no way to restore it.",
     "softDeleteNote": "Deleting deactivates a subcategory rather than removing it, and cannot be undone from here."
   },
