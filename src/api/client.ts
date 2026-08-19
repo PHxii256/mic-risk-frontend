@@ -123,9 +123,9 @@ export async function unwrapAllowingNotFound<T>(
 async function rawRequest(
   method: string,
   path: string,
-  init: { body?: BodyInit; json?: unknown; signal?: AbortSignal } = {},
+  init: { body?: BodyInit; json?: unknown; signal?: AbortSignal; accept?: string } = {},
 ): Promise<Response> {
-  const headers = new Headers({ Accept: 'application/json' })
+  const headers = new Headers({ Accept: init.accept ?? 'application/json' })
   let body = init.body
 
   if (init.json !== undefined) {
@@ -172,4 +172,44 @@ export async function uploadFile<T>(
   for (const [key, value] of Object.entries(fields)) form.append(key, value)
 
   return readOrThrow<T>(await rawRequest('POST', path, { body: form, signal }))
+}
+
+export interface DownloadedFile {
+  blob: Blob
+  fileName: string | null
+}
+
+/**
+ * Downloads an authenticated binary response through the same token refresh path as API calls.
+ * Reading the filename from Content-Disposition also preserves the server-selected extension.
+ */
+export async function downloadFile(
+  path: string,
+  signal?: AbortSignal,
+): Promise<DownloadedFile> {
+  const response = await rawRequest('GET', path, { signal, accept: '*/*' })
+  if (!response.ok) throw await toApiError(response)
+
+  return {
+    blob: await response.blob(),
+    fileName: contentDispositionFileName(response.headers.get('Content-Disposition')),
+  }
+}
+
+function contentDispositionFileName(header: string | null): string | null {
+  if (header === null) return null
+
+  const encoded = /(?:^|;)\s*filename\*\s*=\s*UTF-8''([^;]+)/i.exec(header)?.[1]
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded.trim().replace(/^"|"$/g, ''))
+    } catch {
+      // Fall through to the plain filename when a third-party proxy emits bad encoding.
+    }
+  }
+
+  const quoted = /(?:^|;)\s*filename\s*=\s*"([^"]*)"/i.exec(header)?.[1]
+  if (quoted) return quoted.replace(/\\"/g, '"')
+
+  return /(?:^|;)\s*filename\s*=\s*([^;]+)/i.exec(header)?.[1]?.trim() ?? null
 }

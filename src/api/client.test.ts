@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { api, unwrap, unwrapAllowingNotFound } from './client'
+import { api, downloadFile, unwrap, unwrapAllowingNotFound } from './client'
 import { ApiError } from './errors'
 import { __resetSessionForTests, fromAuthResponse, getSession, setSession } from './session'
 
@@ -32,7 +32,7 @@ let refreshOutcome: 'ok' | 'expired' = 'ok'
 let mineBehaviour: 'requires-fresh-token' | 'always-ok' = 'requires-fresh-token'
 
 const server = setupServer(
-  http.post('http://localhost/api/account/refresh', () => {
+  http.post('http://localhost:5166/api/account/refresh', () => {
     refreshCalls += 1
     if (refreshOutcome === 'expired') {
       return HttpResponse.json({ status: 401, title: 'Unauthorized' }, { status: 401 })
@@ -40,7 +40,7 @@ const server = setupServer(
     return HttpResponse.json(authPayload('fresh-token'))
   }),
 
-  http.get('http://localhost/api/risk-report/mine', ({ request }) => {
+  http.get('http://localhost:5166/api/risk-report/mine', ({ request }) => {
     const header = request.headers.get('Authorization')
     seenTokens.push(header)
 
@@ -57,16 +57,29 @@ const server = setupServer(
     return HttpResponse.json([])
   }),
 
-  http.post('http://localhost/api/account/login', () =>
+  http.post('http://localhost:5166/api/account/login', () =>
     HttpResponse.json(
       { status: 401, title: 'Unauthorized', detail: 'Invalid credentials.' },
       { status: 401 },
     ),
   ),
 
-  http.get('http://localhost/api/risk-subcategory/categories', () =>
+  http.get('http://localhost:5166/api/risk-subcategory/categories', () =>
     HttpResponse.json({ status: 404, title: 'Not Found' }, { status: 404 }),
   ),
+
+  http.get('http://localhost:5166/api/resource/7/download', ({ request }) => {
+    if (request.headers.get('Authorization') !== 'Bearer stored-token') {
+      return HttpResponse.json({ status: 401, title: 'Unauthorized' }, { status: 401 })
+    }
+
+    return new HttpResponse(new Uint8Array([137, 80, 78, 71]), {
+      headers: {
+        'Content-Type': 'image/png',
+        'Content-Disposition': "attachment; filename=chart.png; filename*=UTF-8''risk%20chart.png",
+      },
+    })
+  }),
 )
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
@@ -115,7 +128,7 @@ describe('authFetch', () => {
   // Without this the app would refresh, get another 401, refresh again, and spin.
   it('replays only once and does not loop when the replay also fails', async () => {
     server.use(
-      http.get('http://localhost/api/risk-report/mine', ({ request }) => {
+      http.get('http://localhost:5166/api/risk-report/mine', ({ request }) => {
         seenTokens.push(request.headers.get('Authorization'))
         return HttpResponse.json({ status: 401, title: 'Unauthorized' }, { status: 401 })
       }),
@@ -193,5 +206,38 @@ describe('unwrapAllowingNotFound', () => {
     await expect(
       unwrapAllowingNotFound(api.GET('/api/risk-subcategory/categories'), []),
     ).resolves.toEqual([])
+  })
+})
+
+describe('downloadFile', () => {
+  it('returns the exact response bytes and the UTF-8 attachment filename', async () => {
+    setSession(fromAuthResponse(authPayload('stored-token')))
+
+    const downloaded = await downloadFile('/api/resource/7/download')
+
+    expect(downloaded.fileName).toBe('risk chart.png')
+    expect(downloaded.blob.type).toBe('image/png')
+    expect(new Uint8Array(await downloaded.blob.arrayBuffer())).toEqual(
+      new Uint8Array([137, 80, 78, 71]),
+    )
+  })
+
+  it('throws an API error instead of saving a problem response as a corrupt file', async () => {
+    server.use(
+      http.get('http://localhost:5166/api/resource/8/download', () =>
+        HttpResponse.json(
+          { status: 404, title: 'Not Found', detail: 'The resource file was not found.' },
+          { status: 404 },
+        ),
+      ),
+    )
+    setSession(fromAuthResponse(authPayload('stored-token')))
+
+    const error = await downloadFile('/api/resource/8/download').catch(
+      (caught: unknown) => caught,
+    )
+
+    expect(error).toBeInstanceOf(ApiError)
+    expect((error as ApiError).status).toBe(404)
   })
 })

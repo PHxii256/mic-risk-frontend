@@ -235,6 +235,8 @@
     "takeSurvey": "بدء الاستبيان",
     "watchVideo": "مشاهدة الفيديو",
     "download": "تنزيل",
+    "downloading": "جارٍ التنزيل…",
+    "downloadFailed": "تعذّر تنزيل الملف. يرجى المحاولة مرة أخرى.",
     "viewed": "تمت المشاهدة",
     "viewedBy": "شاهدها {{viewed}} من {{total}}"
   },

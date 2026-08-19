@@ -235,6 +235,8 @@
     "takeSurvey": "Take survey",
     "watchVideo": "Watch video",
     "download": "Download",
+    "downloading": "Downloading…",
+    "downloadFailed": "The file could not be downloaded. Please try again.",
     "viewed": "Viewed",
     "viewedBy": "{{viewed}}/{{total}} viewed"
   },

@@ -2,8 +2,9 @@ import { Check, ClipboardList, Download, ExternalLink, Eye, Plus, Trash2 } from 
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { downloadFile } from '@/api/client'
 import { StateBoundary } from '@/components/app/StateBoundary'
-import { Button, Card, CardBody, Skeleton } from '@/components/ui/primitives'
+import { Button, Card, CardBody, Skeleton, Spinner } from '@/components/ui/primitives'
 import {
   useDeleteResource,
   useEngagementStats,
@@ -98,49 +99,17 @@ function resolveResourceUrl(url: string) {
   return new URL(url, API_BASE_URL).href
 }
 
-/**
- * Fetches the file as a Blob and forces an immediate download.
- *
- * This prevents images/files from opening in a new browser tab.
- */
-async function triggerFileDownload(fullUrl: string, fileName: string) {
-  try {
-    console.log('Downloading:', fullUrl)
-
-    const response = await fetch(fullUrl, {
-      method: 'GET',
-      credentials: 'include',
-    })
-
-    console.log('Response:', response.status, response.headers)
-
-    if (!response.ok) {
-      throw new Error(
-        `Download failed: ${response.status} ${response.statusText}`,
-      )
-    }
-
-    const blob = await response.blob()
-
-    console.log('Blob:', blob.type, blob.size)
-
-    const blobUrl = window.URL.createObjectURL(blob)
-
-    const anchor = document.createElement('a')
-    anchor.href = blobUrl
-    anchor.download = fileName || 'download'
-    anchor.style.display = 'none'
-
-    document.body.appendChild(anchor)
-    anchor.click()
-    anchor.remove()
-
-    setTimeout(() => {
-      window.URL.revokeObjectURL(blobUrl)
-    }, 1000)
-  } catch (error) {
-    console.error('DOWNLOAD ERROR:', error)
-  }
+/** Saves bytes already returned by the API without navigating away from the application. */
+function saveBlob(blob: Blob, fileName: string) {
+  const blobUrl = window.URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = blobUrl
+  anchor.download = fileName
+  anchor.style.display = 'none'
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000)
 }
 
 export function ResourcesPage() {
@@ -154,6 +123,8 @@ export function ResourcesPage() {
   const remove = useDeleteResource()
   const stats = useEngagementStats({ enabled: isAdmin })
   const [uploading, setUploading] = useState(false)
+  const [downloadingId, setDownloadingId] = useState<number | null>(null)
+  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   const engagementByResource = useMemo(() => {
     const map = new Map<number, { viewed: boolean; surveyCompleted: boolean }>()
@@ -198,6 +169,12 @@ export function ResourcesPage() {
 
       {uploading ? (
         <CreateResourcePanel onClose={() => setUploading(false)} />
+      ) : null}
+
+      {downloadError ? (
+        <p className="rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger" role="alert">
+          {downloadError}
+        </p>
       ) : null}
 
       <StateBoundary
@@ -263,20 +240,27 @@ export function ResourcesPage() {
                         type="button"
                         variant="secondary"
                         size="sm"
-                        onClick={() => {
-                          const fullUrl = resolveResourceUrl(resource.url)
-
+                        disabled={isFile && downloadingId === resource.id}
+                        onClick={async () => {
                           if (isFile) {
-                            // Files and images are downloaded directly.
-                            // They will NOT open in a new tab.
-                            void triggerFileDownload(
-                              fullUrl,
-                              resource.name,
-                            )
+                            setDownloadError(null)
+                            setDownloadingId(resource.id)
+
+                            try {
+                              const downloaded = await downloadFile(
+                                `/api/resource/${resource.id}/download`,
+                              )
+                              saveBlob(downloaded.blob, downloaded.fileName ?? resource.name)
+                            } catch {
+                              setDownloadError(t('resource.downloadFailed'))
+                              return
+                            } finally {
+                              setDownloadingId(null)
+                            }
                           } else {
                             // Videos and regular links still open in a new tab.
                             window.open(
-                              fullUrl,
+                              resolveResourceUrl(resource.url),
                               '_blank',
                               'noopener,noreferrer',
                             )
@@ -294,12 +278,18 @@ export function ResourcesPage() {
                           }
                         }}
                       >
-                        <ActionIcon
-                          className="size-3.5"
-                          aria-hidden="true"
-                        />
+                        {isFile && downloadingId === resource.id ? (
+                          <Spinner />
+                        ) : (
+                          <ActionIcon
+                            className="size-3.5"
+                            aria-hidden="true"
+                          />
+                        )}
 
-                        {t(labelKey)}
+                        {isFile && downloadingId === resource.id
+                          ? t('resource.downloading')
+                          : t(labelKey)}
                       </Button>
 
                       {isSurvey && !isAdmin ? (
