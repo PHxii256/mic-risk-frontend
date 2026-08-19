@@ -43,10 +43,15 @@ export function useRiskCategories() {
       )
 
       return data.map((group) => ({
-        category: group.name,
+        category: group.nameEn,
         // The nested items carry no category of their own, so it comes from the group.
         subcategories: group.riskSubcategories.map((sub) =>
-          mapSubcategory({ id: sub.id, name: sub.name, category: group.name }),
+          mapSubcategory({
+            id: sub.id,
+            nameEn: sub.nameEn,
+            nameAr: sub.nameAr,
+            category: group.nameEn,
+          }),
         ),
       }))
     },

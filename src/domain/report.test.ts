@@ -41,7 +41,12 @@ const evaluationDto = {
 const reportDto = {
   id: 1,
   reporter: employeeDto,
-  subCategory: { id: 1, name: 'Fraud', category: 'Financial' },
+  subCategory: {
+    id: 1,
+    nameEn: 'Fraud',
+    nameAr: 'احتيال',
+    category: 'Financial',
+  },
   reportedEvaluation: evaluationDto,
   auditorEvaluation: null,
   description: 'Test risk',
@@ -139,7 +144,15 @@ describe('mapReport', () => {
 
   it('rejects an unknown risk category', () => {
     expect(() =>
-      mapReport({ ...reportDto, subCategory: { id: 1, name: 'X', category: 'Reputational' } }),
+      mapReport({
+        ...reportDto,
+        subCategory: {
+          id: 1,
+          nameEn: 'X',
+          nameAr: 'س',
+          category: 'Reputational',
+        },
+      }),
     ).toThrow(ContractViolationError)
   })
 })
