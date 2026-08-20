@@ -62,7 +62,8 @@
     "searchPlaceholder": "ابحث في الوصف أو مقدّم البلاغ أو التصنيف الفرعي",
     "sortAscending": "الأقدم أولًا",
     "sortDescending": "الأحدث أولًا",
-    "clearFilters": "مسح"
+    "clearFilters": "مسح",
+    "mitigationRequired": "أضف إجراء تخفيف واحدًا على الأقل قبل تحديد البلاغ كمُعالج."
   },
   "scoring": {
     "severity": "الأثر",
@@ -113,7 +114,8 @@
   "status": {
     "Submitted": "مُرسل",
     "InReview": "قيد المراجعة",
-    "Resolved": "مُعالج"
+    "Resolved": "مُعالج",
+    "Archived": "مؤرشف"
   },
   "riskCategory": {
     "Financial": "مالية",
@@ -180,7 +182,6 @@
     "createdAt": "تاريخ الإنشاء",
     "activate": "تفعيل",
     "deactivate": "إلغاء التفعيل",
-    "initialPassword": "كلمة المرور الأولية",
     "resetPassword": "إعادة تعيين كلمة المرور",
     "resetHint": "يؤدي هذا أيضًا إلى تسجيل خروج الموظف من كل الأجهزة.",
     "confirmSelfDeactivate": "سيؤدي هذا إلى إلغاء تفعيل حسابك وتسجيل خروجك. هل تريد المتابعة؟"
@@ -227,10 +228,10 @@
     "add": "إضافة مصدر",
     "addTitle": "إضافة مصدر",
     "tabFile": "رفع ملف",
-    "tabLink": "رابط أو فيديو",
+    "tabLink": "رابط",
     "tabSurvey": "استبيان",
     "url": "الرابط",
-    "urlHint": "صفحة ويب، أو رابط يوتيوب أو فيميو.",
+    "urlHint": "رابط صفحة ويب.",
     "surveyUrl": "رابط الاستبيان",
     "surveyHint": "رابط الاستبيان أو الاستقصاء الذي ينبغي على الموظفين إكماله.",
     "detectedType": "سيُحفظ باعتباره",

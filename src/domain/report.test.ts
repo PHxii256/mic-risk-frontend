@@ -63,8 +63,12 @@ describe('canTransition', () => {
     expect(canTransition('Resolved', 'InReview')).toBe(true)
   })
 
-  it('rejects the one transition the server refuses', () => {
-    expect(canTransition('Resolved', 'Submitted')).toBe(false)
+  it('allows reports to move between all known lifecycle states', () => {
+    for (const from of REPORT_STATUSES) {
+      for (const to of REPORT_STATUSES) {
+        expect(canTransition(from, to)).toBe(true)
+      }
+    }
   })
 
   it('treats a no-op as allowed, matching the server', () => {
@@ -73,7 +77,7 @@ describe('canTransition', () => {
     }
   })
 
-  // The triage UI builds its menu from allowedTransitions, so anything it offers must be legal.
+  // Any status list built from the domain transitions must contain only legal targets.
   it('never offers a target that canTransition would reject', () => {
     for (const from of REPORT_STATUSES) {
       for (const to of allowedTransitions(from)) {
@@ -139,7 +143,11 @@ describe('mapReport', () => {
   })
 
   it('rejects a status outside the known set rather than rendering it', () => {
-    expect(() => mapReport({ ...reportDto, status: 'Archived' })).toThrow(ContractViolationError)
+    expect(() => mapReport({ ...reportDto, status: 'Cancelled' })).toThrow(ContractViolationError)
+  })
+
+  it('maps the archived lifecycle state', () => {
+    expect(mapReport({ ...reportDto, status: 'Archived' }).status).toBe('Archived')
   })
 
   it('rejects an unknown risk category', () => {

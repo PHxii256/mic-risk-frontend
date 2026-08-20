@@ -16,6 +16,7 @@ const STATUS_CLASSES: Record<ReportStatus, string> = {
   Submitted: 'text-status-submitted',
   InReview: 'text-status-inreview',
   Resolved: 'text-status-resolved',
+  Archived: 'text-ink-muted',
 }
 
 /**

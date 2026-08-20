@@ -1,53 +1,66 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ApiError } from '@/api/errors'
-import { StatusBadge } from '@/components/app/RiskBadge'
-import { Button, Spinner } from '@/components/ui/primitives'
-import { allowedTransitions, type ReportStatus, type RiskReport } from '@/domain/report'
-import { useUpdateReportStatus } from '@/features/admin/hooks'
+import { Select, Spinner } from '@/components/ui/primitives'
+import { REPORT_STATUSES, type ReportStatus, type RiskReport } from '@/domain/report'
+import { useActionsByReport, useUpdateReportStatus } from '@/features/admin/hooks'
 
 /**
  * Moves a report through its lifecycle.
  *
- * Only the transitions the server accepts are offered — the graph is mirrored in
- * `allowedTransitions`, and anything outside it comes back as a 400 the user cannot act on.
- * Notably `Resolved` reopens only to `InReview`, never straight back to `Submitted`.
+ * Every lifecycle state is visible in one select. Resolution is guarded in both the UI and API:
+ * at least one mitigation must exist before the report can be marked resolved.
  */
 export function StatusControl({ report }: { report: RiskReport }) {
   const { t } = useTranslation()
   const update = useUpdateReportStatus(report.id)
+  const actions = useActionsByReport(report.id, true)
+  const [guardMessage, setGuardMessage] = useState<string | null>(null)
 
-  const targets = allowedTransitions(report.status).filter((next) => next !== report.status)
+  const hasMitigation = (actions.data?.length ?? 0) > 0
+
+  function changeStatus(nextStatus: ReportStatus) {
+    if (nextStatus === report.status) return
+
+    if (nextStatus === 'Resolved' && !hasMitigation) {
+      setGuardMessage(t('report.mitigationRequired'))
+      return
+    }
+
+    setGuardMessage(null)
+    update.mutate(nextStatus)
+  }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <StatusBadge status={report.status} />
-
-      {targets.length > 0 ? (
-        <>
-          <span className="text-xs text-ink-subtle">{t('report.moveTo')}</span>
-
-          {targets.map((target) => (
-            <Button
-              key={target}
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={update.isPending}
-              onClick={() => update.mutate(target as ReportStatus)}
-            >
-              {update.isPending ? <Spinner /> : null}
-              {t(`status.${target}`)}
-            </Button>
+    <div className="flex max-w-sm flex-col items-stretch gap-1.5">
+      <label className="flex items-center gap-2 text-xs text-ink-muted">
+        {t('report.status')}
+        <Select
+          value={report.status}
+          disabled={update.isPending || actions.isPending}
+          aria-label={t('report.status')}
+          onChange={(event) => changeStatus(event.currentTarget.value as ReportStatus)}
+        >
+          {REPORT_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {t(`status.${status}`)}
+            </option>
           ))}
-        </>
+        </Select>
+        {update.isPending ? <Spinner /> : null}
+      </label>
+
+      {!actions.isPending && !hasMitigation && !guardMessage && !update.isError ? (
+        <span className="text-xs text-ink-subtle">{t('report.mitigationRequired')}</span>
       ) : null}
 
-      {update.isError ? (
-        <span className="text-xs text-danger" role="alert">
-          {update.error instanceof ApiError
-            ? (update.error.detail ?? t('state.errorTitle'))
-            : t('state.errorTitle')}
+      {guardMessage || update.isError ? (
+        <span className="rounded-sm bg-danger-bg px-2 py-1 text-xs text-danger" role="alert">
+          {guardMessage ??
+            (update.error instanceof ApiError
+              ? (update.error.detail ?? t('state.errorTitle'))
+              : t('state.errorTitle'))}
         </span>
       ) : null}
     </div>

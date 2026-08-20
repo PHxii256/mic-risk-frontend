@@ -2278,7 +2278,6 @@ export interface components {
         };
         CreateEmployeeRequestDto: {
             email: string;
-            password: string;
             name: string;
             /** Format: int64 */
             deptId: number | string;

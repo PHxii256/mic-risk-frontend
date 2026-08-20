@@ -62,7 +62,8 @@
     "searchPlaceholder": "Search description, reporter or subcategory",
     "sortAscending": "Oldest first",
     "sortDescending": "Newest first",
-    "clearFilters": "Clear"
+    "clearFilters": "Clear",
+    "mitigationRequired": "Add at least one mitigation before marking this report as resolved."
   },
   "scoring": {
     "severity": "Severity",
@@ -113,7 +114,8 @@
   "status": {
     "Submitted": "Submitted",
     "InReview": "In review",
-    "Resolved": "Resolved"
+    "Resolved": "Resolved",
+    "Archived": "Archived"
   },
   "riskCategory": {
     "Financial": "Financial",
@@ -180,7 +182,6 @@
     "createdAt": "Created",
     "activate": "Activate",
     "deactivate": "Deactivate",
-    "initialPassword": "Initial password",
     "resetPassword": "Reset password",
     "resetHint": "This also signs the employee out everywhere.",
     "confirmSelfDeactivate": "This deactivates your own account and will sign you out. Continue?"
@@ -227,10 +228,10 @@
     "add": "Add resource",
     "addTitle": "Add a resource",
     "tabFile": "File upload",
-    "tabLink": "Link or video",
+    "tabLink": "Link",
     "tabSurvey": "Survey",
     "url": "URL",
-    "urlHint": "A web page, or a YouTube or Vimeo link.",
+    "urlHint": "A webpage link.",
     "surveyUrl": "Survey URL",
     "surveyHint": "A link to the survey or questionnaire employees should complete.",
     "detectedType": "Will be saved as",

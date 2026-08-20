@@ -75,7 +75,7 @@ function ReportDetail({ report }: { report: RiskReport }) {
         </CardBody>
       </Card>
 
-      <EvaluationPanel report={report} />
+      {isAdmin ? <EvaluationPanel report={report} /> : null}
 
       {/* The whole risk-action controller is admin-only, including reads. */}
       {isAdmin ? <ReportActionsPanel reportId={report.id} /> : null}

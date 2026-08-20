@@ -141,7 +141,6 @@ export function useEmployees() {
 
 export interface CreateEmployeeInput {
   email: string
-  password: string
   name: string
   deptId: number
   role: string

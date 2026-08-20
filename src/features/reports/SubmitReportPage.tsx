@@ -151,27 +151,29 @@ export function SubmitReportPage() {
           </CardBody>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('report.evaluation')}</CardTitle>
-          </CardHeader>
-          <CardBody className="space-y-5">
-            <EvaluationFields control={control} register={register} showPriority={isAdmin} />
+        {isAdmin ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('report.evaluation')}</CardTitle>
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <EvaluationFields control={control} register={register} showPriority />
 
-            <div className="flex flex-wrap gap-6 rounded-sm bg-surface-muted px-3 py-2.5">
-              <ScorePreview
-                label={t('scoring.inherentRisk')}
-                hint={t('scoring.inherentRiskHint')}
-                score={inherent}
-              />
-              <ScorePreview
-                label={t('scoring.residualRisk')}
-                hint={t('scoring.residualRiskHint')}
-                score={residual}
-              />
-            </div>
-          </CardBody>
-        </Card>
+              <div className="flex flex-wrap gap-6 rounded-sm bg-surface-muted px-3 py-2.5">
+                <ScorePreview
+                  label={t('scoring.inherentRisk')}
+                  hint={t('scoring.inherentRiskHint')}
+                  score={inherent}
+                />
+                <ScorePreview
+                  label={t('scoring.residualRisk')}
+                  hint={t('scoring.residualRiskHint')}
+                  score={residual}
+                />
+              </div>
+            </CardBody>
+          </Card>
+        ) : null}
 
         {createReport.isError ? (
           <p className="rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger" role="alert">

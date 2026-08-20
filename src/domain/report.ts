@@ -16,21 +16,21 @@ type EmployeeDto = components['schemas']['EmployeeResponseDto']
 type SubcategoryDto = components['schemas']['RiskSubcategoryResponseDto']
 
 /** The contract types status as a plain string; these are the values the server accepts. */
-export const REPORT_STATUSES = ['Submitted', 'InReview', 'Resolved'] as const
+export const REPORT_STATUSES = ['Submitted', 'InReview', 'Resolved', 'Archived'] as const
 export type ReportStatus = (typeof REPORT_STATUSES)[number]
 
 export const RISK_CATEGORIES = ['Financial', 'Operational', 'Strategic', 'Insurance'] as const
 export type RiskCategory = (typeof RISK_CATEGORIES)[number]
 
 /**
- * The transitions the server will accept, mirrored from `Validation/RiskValidators.cs`.
- * Offering an illegal target would produce a 400 the user cannot act on, so the triage UI
- * builds its options from here.
+ * Every recognized lifecycle state can move to every other state. Resolution has the separate
+ * mitigation prerequisite, enforced by the API and surfaced by the status control.
  */
 const ALLOWED_TRANSITIONS: Record<ReportStatus, readonly ReportStatus[]> = {
-  Submitted: ['InReview', 'Resolved'],
-  InReview: ['Submitted', 'Resolved'],
-  Resolved: ['InReview'],
+  Submitted: REPORT_STATUSES,
+  InReview: REPORT_STATUSES,
+  Resolved: REPORT_STATUSES,
+  Archived: REPORT_STATUSES,
 }
 
 export function allowedTransitions(from: ReportStatus): readonly ReportStatus[] {

@@ -2,9 +2,8 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 
-import { RiskScore, StatusBadge } from "@/components/app/RiskBadge";
+import { StatusBadge } from "@/components/app/RiskBadge";
 import {
-  EmptyState,
   EmptyStateTemplate,
   StateBoundary,
 } from "@/components/app/StateBoundary";
@@ -71,8 +70,6 @@ function ReportsTable({
             <tr className="border-b border-border-subtle bg-surface-muted text-xs text-ink-muted">
               <Th>{t("report.description")}</Th>
               <Th>{t("report.subcategory")}</Th>
-              <Th>{t("scoring.inherentRisk")}</Th>
-              <Th>{t("scoring.residualRisk")}</Th>
               <Th>{t("report.status")}</Th>
               <Th>{t("report.submittedAt")}</Th>
             </tr>
@@ -92,18 +89,6 @@ function ReportsTable({
                   </Link>
                 </Td>
                 <Td className="text-ink-muted">{report.subCategory.nameEn}</Td>
-                <Td>
-                  <RiskScore
-                    score={report.effectiveEvaluation.inherentRisk}
-                    band={report.effectiveEvaluation.inherentBand}
-                  />
-                </Td>
-                <Td>
-                  <RiskScore
-                    score={report.effectiveEvaluation.residualRisk}
-                    band={report.effectiveEvaluation.residualBand}
-                  />
-                </Td>
                 <Td>
                   <StatusBadge status={report.status} />
                 </Td>
