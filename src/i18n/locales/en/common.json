@@ -124,7 +124,9 @@
   "state": {
     "loading": "Loading…",
     "empty": "Nothing to show",
-    "emptyReports": "You have not submitted any risk reports yet. Tap here to submit a risk.",
+    "emptyReports1": "You have not submitted any risk reports yet. Tap here to submit a risk. ",
+    "emptyReportsTapHere": "Tap here ",
+    "emptyReports2": "to submit a risk.",
     "errorTitle": "Something went wrong",
     "retry": "Try again",
     "forbiddenTitle": "You do not have access",

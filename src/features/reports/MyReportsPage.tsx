@@ -1,28 +1,34 @@
-import { Plus } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router' 
+import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router";
 
-import { RiskScore, StatusBadge } from '@/components/app/RiskBadge'
-import { EmptyState, StateBoundary } from '@/components/app/StateBoundary'
-import { buttonStyles } from '@/components/ui/buttonStyles'
-import { Card, Skeleton } from '@/components/ui/primitives'
-import type { RiskReport } from '@/domain/report'
-import { formatDate } from '@/lib/format'
+import { RiskScore, StatusBadge } from "@/components/app/RiskBadge";
+import {
+  EmptyState,
+  EmptyStateTemplate,
+  StateBoundary,
+} from "@/components/app/StateBoundary";
+import { buttonStyles } from "@/components/ui/buttonStyles";
+import { Card, Skeleton } from "@/components/ui/primitives";
+import type { RiskReport } from "@/domain/report";
+import { formatDate } from "@/lib/format";
 
-import { useMyReports } from './hooks/queries'
+import { useMyReports } from "./hooks/queries";
 
 export function MyReportsPage() {
-  const { t, i18n } = useTranslation()
-  const query = useMyReports()
-  const navigate = useNavigate()
-  
+  const { t, i18n } = useTranslation();
+  const query = useMyReports();
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-base font-semibold text-ink">{t('nav.myReports')}</h1>
+        <h1 className="text-base font-semibold text-ink">
+          {t("nav.myReports")}
+        </h1>
         <Link to="/reports/new" className={buttonStyles()}>
           <Plus className="size-3.5" aria-hidden="true" />
-          {t('nav.submitReport')}
+          {t("nav.submitReport")}
         </Link>
       </div>
 
@@ -34,20 +40,28 @@ export function MyReportsPage() {
         skeleton={<TableSkeleton />}
         isEmpty={(reports) => reports.length === 0}
         empty={
-          <EmptyState
-            message={t('state.emptyReports')}
-            onClick={() => void navigate('/reports/new')} // 3. Use navigate here
+          <EmptyStateTemplate
+            message1={t("state.emptyReports1")}
+            message2={t("state.emptyReportsTapHere")}
+            message3={t("state.emptyReports2")}
+            onClick={() => void navigate("/reports/new")} // 3. Use navigate here
           />
         }
       >
         {(reports) => <ReportsTable reports={reports} locale={i18n.language} />}
       </StateBoundary>
     </div>
-  )
+  );
 }
 
-function ReportsTable({ reports, locale }: { reports: RiskReport[]; locale: string }) {
-  const { t } = useTranslation()
+function ReportsTable({
+  reports,
+  locale,
+}: {
+  reports: RiskReport[];
+  locale: string;
+}) {
+  const { t } = useTranslation();
 
   return (
     <Card className="overflow-hidden">
@@ -55,12 +69,12 @@ function ReportsTable({ reports, locale }: { reports: RiskReport[]; locale: stri
         <table className="w-full text-start text-sm">
           <thead>
             <tr className="border-b border-border-subtle bg-surface-muted text-xs text-ink-muted">
-              <Th>{t('report.description')}</Th>
-              <Th>{t('report.subcategory')}</Th>
-              <Th>{t('scoring.inherentRisk')}</Th>
-              <Th>{t('scoring.residualRisk')}</Th>
-              <Th>{t('report.status')}</Th>
-              <Th>{t('report.submittedAt')}</Th>
+              <Th>{t("report.description")}</Th>
+              <Th>{t("report.subcategory")}</Th>
+              <Th>{t("scoring.inherentRisk")}</Th>
+              <Th>{t("scoring.residualRisk")}</Th>
+              <Th>{t("report.status")}</Th>
+              <Th>{t("report.submittedAt")}</Th>
             </tr>
           </thead>
           <tbody>
@@ -102,19 +116,27 @@ function ReportsTable({ reports, locale }: { reports: RiskReport[]; locale: stri
         </table>
       </div>
     </Card>
-  )
+  );
 }
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th className="px-3 py-2 text-start font-medium">{children}</th>
+  return <th className="px-3 py-2 text-start font-medium">{children}</th>;
 }
 
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-3 py-2 align-middle ${className ?? ''}`}>{children}</td>
+function Td({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <td className={`px-3 py-2 align-middle ${className ?? ""}`}>{children}</td>
+  );
 }
 
 function truncate(text: string, max = 70): string {
-  return text.length <= max ? text : `${text.slice(0, max).trimEnd()}…`
+  return text.length <= max ? text : `${text.slice(0, max).trimEnd()}…`;
 }
 
 /** Matches the table's real geometry rather than showing a generic spinner. */
@@ -137,5 +159,5 @@ function TableSkeleton() {
         </div>
       ))}
     </Card>
-  )
+  );
 }

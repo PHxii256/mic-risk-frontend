@@ -124,7 +124,9 @@
   "state": {
     "loading": "جارٍ التحميل…",
     "empty": "لا يوجد ما يُعرض",
-    "emptyReports": "لم تقم بإرسال أي بلاغات مخاطر بعد. اضغط هنا لاضافة خطر",
+    "emptyReports1": "لم تقم بإرسال أي بلاغات مخاطر بعد. ",
+    "emptyReportsTapHere": "اضغط هنا ",
+    "emptyReports2": "لاضافة خطر",
     "errorTitle": "حدث خطأ ما",
     "retry": "إعادة المحاولة",
     "forbiddenTitle": "لا تملك صلاحية الوصول",
