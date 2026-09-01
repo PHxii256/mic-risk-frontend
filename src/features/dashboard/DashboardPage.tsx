@@ -96,7 +96,7 @@ export function DashboardPage() {
           {(result) => (
             <TableShell>
               <HeadRow>
-                <Th>{t('report.description')}</Th>
+                <Th>{t('report.cause')}</Th>
                 <Th>{t('report.reporter')}</Th>
                 <Th>{t('scoring.residualRisk')}</Th>
                 <Th>{t('report.status')}</Th>
@@ -110,7 +110,7 @@ export function DashboardPage() {
                         to={`/reports/${report.id}`}
                         className="font-medium text-accent hover:underline"
                       >
-                        {truncate(report.description)}
+                        {truncate(report.cause)}
                       </Link>
                     </Td>
                     <Td className="whitespace-nowrap text-ink-muted">{report.reporter.name}</Td>

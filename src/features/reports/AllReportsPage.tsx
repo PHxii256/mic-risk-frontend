@@ -8,6 +8,7 @@ import { RiskScore, StatusBadge } from '@/components/app/RiskBadge'
 import { EmptyState, StateBoundary } from '@/components/app/StateBoundary'
 import { Button, Input, Select } from '@/components/ui/primitives'
 import { REPORT_STATUSES, type ReportStatus } from '@/domain/report'
+import { assignedDepartmentLabel } from '@/domain/assignedDepartments'
 import { useAllReports } from '@/features/admin/hooks'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -166,7 +167,7 @@ export function AllReportsPage() {
         error={query.error}
         data={query.data}
         onRetry={() => void query.refetch()}
-        skeleton={<TableSkeleton columns={7} />}
+        skeleton={<TableSkeleton columns={8} />}
         isEmpty={(result) => result.items.length === 0}
         empty={<EmptyState message={t('report.noReportsMatch')} />}
       >
@@ -174,7 +175,8 @@ export function AllReportsPage() {
           <div>
             <TableShell>
               <HeadRow>
-                <SortableTh label={t('report.description')} />
+                <SortableTh label={t('report.cause')} />
+                <SortableTh label={t('report.assignedDepartment')} />
                 <SortableTh
                   label={t('report.reporter')}
                   sortKey="reporter"
@@ -183,7 +185,7 @@ export function AllReportsPage() {
                   onSort={toggleSort}
                 />
                 <SortableTh
-                  label={t('report.subcategory')}
+                  label={t('report.category')}
                   sortKey="subcategory"
                   active={sortBy}
                   dir={sortDir}
@@ -226,16 +228,17 @@ export function AllReportsPage() {
                         to={`/reports/${report.id}`}
                         className="font-medium text-accent hover:underline"
                       >
-                        {truncate(report.description)}
+                        {truncate(report.cause)}
                       </Link>
                     </Td>
+                    <Td className="text-ink-muted">{assignedDepartmentLabel(report.assignedDepartment, t)}</Td>
                     <Td className="whitespace-nowrap text-ink-muted">
                       {report.reporter.name}
                       <span className="block text-xs text-ink-subtle">
                         {report.reporter.department.name}
                       </span>
                     </Td>
-                    <Td className="text-ink-muted">{report.subCategory.nameEn}</Td>
+                    <Td className="text-ink-muted">{t(`riskCategory.${report.category}`)}</Td>
                     <Td>
                       <RiskScore
                         score={report.effectiveEvaluation.inherentRisk}
@@ -286,7 +289,7 @@ function SortableTh({
   dir?: 'asc' | 'desc'
   onSort?: (key: SortKey) => void
 }) {
-  // The description column has no server-side sort, so it stays a plain header.
+  // The cause column has no server-side sort, so it stays a plain header.
   if (!sortKey || !onSort) {
     return <th className="px-3 py-2 text-start text-xs font-medium text-ink-muted">{label}</th>
   }

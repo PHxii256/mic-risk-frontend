@@ -184,6 +184,7 @@ export interface AnalyticsDashboard {
   risksThisMonth: number
   risksByDepartment: CountByLabel[]
   risksByLocation: CountByLabel[]
+  categoryDistribution: CountByLabel[]
   subcategoryDistribution: CountByLabel[]
   maturityByDepartment: { departmentName: string; maturityScore: number }[]
   /** Severity x frequency for open reports, before controls are credited. */
@@ -216,6 +217,7 @@ export function mapDashboard(dto: DashboardDto): AnalyticsDashboard {
     risksThisMonth: toInteger(dto.risksSubmittedThisMonth, 'dashboard.thisMonth'),
     risksByDepartment: dto.risksByDepartment.map(mapCount),
     risksByLocation: dto.risksByLocation.map(mapCount),
+    categoryDistribution: dto.riskCategoryDistribution.map(mapCount),
     subcategoryDistribution: dto.riskSubcategoryDistribution.map(mapCount),
     maturityByDepartment: dto.riskMaturityByDepartment.map((m) => ({
       departmentName: m.departmentName,
@@ -259,4 +261,26 @@ export function mapEmployeeDepartmentStats(dto: DepartmentStatsDto): EmployeeDep
 /** Convenience for tiles that colour a count by the band it represents. */
 export function bandOf(score: number): RiskBand {
   return riskBand(score)
+}
+
+export interface EmailReminderTemplate {
+  id: number
+  name: string
+  subject: string
+  body: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export function mapEmailReminderTemplate(
+  dto: components['schemas']['EmailReminderTemplateDto'],
+): EmailReminderTemplate {
+  return {
+    id: toInteger(dto.id, 'emailTemplate.id'),
+    name: dto.name,
+    subject: dto.subject,
+    body: dto.body,
+    createdAt: toDate(dto.createdAt, 'emailTemplate.createdAt'),
+    updatedAt: toDate(dto.updatedAt, 'emailTemplate.updatedAt'),
+  }
 }

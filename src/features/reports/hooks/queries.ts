@@ -9,6 +9,7 @@ import {
   mapSubcategory,
   type Page,
   type RiskReport,
+  type RiskCategory,
   type StatusChange,
   type Subcategory,
 } from '@/domain/report'
@@ -105,8 +106,14 @@ export function useReportHistory(reportId: number, page = 1) {
 
 export interface CreateReportInput {
   empId: number
-  subCategoryId: number
-  description: string
+  category: RiskCategory
+  cause: string
+  consequences: string
+  assignedDepartment: string | null
+  dueDate: string
+  ownerEmails: string[]
+  sendReminderEmails: boolean
+  reminderTemplateId: number | null
   severity: number
   frequency: number
   controlEffectiveness: number
@@ -128,8 +135,14 @@ export function useCreateReport() {
         api.POST('/api/risk-report', {
           body: {
             empId: input.empId,
-            subCategoryId: input.subCategoryId,
-            description: input.description,
+            category: input.category,
+            cause: input.cause,
+            consequences: input.consequences,
+            assignedDepartment: input.assignedDepartment,
+            dueDate: input.dueDate,
+            ownerEmails: input.ownerEmails,
+            sendReminderEmails: input.sendReminderEmails,
+            reminderTemplateId: input.reminderTemplateId,
             evaluation: {
               severity: input.severity,
               frequency: input.frequency,
@@ -146,6 +159,54 @@ export function useCreateReport() {
     onSuccess: (report) => {
       queryClient.setQueryData(reportKeys.detail(report.id), report)
       void queryClient.invalidateQueries({ queryKey: reportKeys.mine() })
+    },
+  })
+}
+
+export function useUpdateReminderSettings(reportId: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['reports', 'reminders', reportId],
+    mutationFn: async (input: {
+      dueDate: string
+      ownerEmails: string[]
+      sendReminderEmails: boolean
+      reminderTemplateId: number | null
+    }): Promise<RiskReport> =>
+      mapReport(
+        await unwrap(
+          api.PUT('/api/risk-report/{id}/reminders', {
+            params: { path: { id: reportId } },
+            body: input,
+          }),
+        ),
+      ),
+    onSuccess: (report) => {
+      queryClient.setQueryData(reportKeys.detail(report.id), report)
+      void queryClient.invalidateQueries({ queryKey: reportKeys.mine() })
+    },
+  })
+}
+
+export function useUpdateAssignedDepartment(reportId: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['reports', 'department', reportId],
+    mutationFn: async (assignedDepartment: string | null): Promise<RiskReport> =>
+      mapReport(
+        await unwrap(
+          api.PUT('/api/risk-report/{id}/department', {
+            params: { path: { id: reportId } },
+            body: { assignedDepartment },
+          }),
+        ),
+      ),
+    onSuccess: (report) => {
+      queryClient.setQueryData(reportKeys.detail(report.id), report)
+      void queryClient.invalidateQueries({ queryKey: reportKeys.mine() })
+      void queryClient.invalidateQueries({ queryKey: ['reports', 'all'] })
     },
   })
 }

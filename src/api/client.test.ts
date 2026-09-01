@@ -11,6 +11,7 @@ const employee = {
   identityUserId: 'u1',
   email: 'user@mic.test',
   name: 'Plain User',
+  jobTitle: null,
   department: { id: 1, name: 'Risk', branchLocation: 'HQ' },
   active: true,
   createdAt: '2026-08-18T10:51:48+03:00',
@@ -32,7 +33,7 @@ let refreshOutcome: 'ok' | 'expired' = 'ok'
 let mineBehaviour: 'requires-fresh-token' | 'always-ok' = 'requires-fresh-token'
 
 const server = setupServer(
-  http.post('http://localhost:5166/api/account/refresh', () => {
+  http.post('http://localhost/api/account/refresh', () => {
     refreshCalls += 1
     if (refreshOutcome === 'expired') {
       return HttpResponse.json({ status: 401, title: 'Unauthorized' }, { status: 401 })
@@ -40,7 +41,7 @@ const server = setupServer(
     return HttpResponse.json(authPayload('fresh-token'))
   }),
 
-  http.get('http://localhost:5166/api/risk-report/mine', ({ request }) => {
+  http.get('http://localhost/api/risk-report/mine', ({ request }) => {
     const header = request.headers.get('Authorization')
     seenTokens.push(header)
 
@@ -57,18 +58,18 @@ const server = setupServer(
     return HttpResponse.json([])
   }),
 
-  http.post('http://localhost:5166/api/account/login', () =>
+  http.post('http://localhost/api/account/login', () =>
     HttpResponse.json(
       { status: 401, title: 'Unauthorized', detail: 'Invalid credentials.' },
       { status: 401 },
     ),
   ),
 
-  http.get('http://localhost:5166/api/risk-subcategory/categories', () =>
+  http.get('http://localhost/api/risk-subcategory/categories', () =>
     HttpResponse.json({ status: 404, title: 'Not Found' }, { status: 404 }),
   ),
 
-  http.get('http://localhost:5166/api/resource/7/download', ({ request }) => {
+  http.get('http://localhost/api/resource/7/download', ({ request }) => {
     if (request.headers.get('Authorization') !== 'Bearer stored-token') {
       return HttpResponse.json({ status: 401, title: 'Unauthorized' }, { status: 401 })
     }
@@ -128,7 +129,7 @@ describe('authFetch', () => {
   // Without this the app would refresh, get another 401, refresh again, and spin.
   it('replays only once and does not loop when the replay also fails', async () => {
     server.use(
-      http.get('http://localhost:5166/api/risk-report/mine', ({ request }) => {
+      http.get('http://localhost/api/risk-report/mine', ({ request }) => {
         seenTokens.push(request.headers.get('Authorization'))
         return HttpResponse.json({ status: 401, title: 'Unauthorized' }, { status: 401 })
       }),
@@ -224,7 +225,7 @@ describe('downloadFile', () => {
 
   it('throws an API error instead of saving a problem response as a corrupt file', async () => {
     server.use(
-      http.get('http://localhost:5166/api/resource/8/download', () =>
+      http.get('http://localhost/api/resource/8/download', () =>
         HttpResponse.json(
           { status: 404, title: 'Not Found', detail: 'The resource file was not found.' },
           { status: 404 },

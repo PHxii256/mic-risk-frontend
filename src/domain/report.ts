@@ -54,6 +54,7 @@ export interface Employee {
   identityUserId: string
   email: string
   name: string
+  jobTitle: string | null
   department: Department
   active: boolean
   createdAt: Date
@@ -85,12 +86,20 @@ export interface Evaluation {
 export interface RiskReport {
   id: number
   reporter: Employee
-  subCategory: Subcategory
+  category: RiskCategory
+  subCategory: Subcategory | null
   reportedEvaluation: Evaluation
   auditorEvaluation: Evaluation | null
-  description: string
+  cause: string
+  consequences: string
+  assignedDepartment: string | null
   status: ReportStatus
   submittedAt: Date
+  dueDate: Date
+  sendReminderEmails: boolean
+  lastReminderSentAt: Date | null
+  reminderTemplateId: number | null
+  ownerEmails: string[]
   /** The auditor's assessment supersedes the reporter's wherever one exists. */
   effectiveEvaluation: Evaluation
 }
@@ -126,6 +135,7 @@ export function mapEmployee(dto: EmployeeDto): Employee {
     identityUserId: dto.identityUserId,
     email: dto.email,
     name: dto.name,
+    jobTitle: toOptionalText(dto.jobTitle),
     department: mapDepartment(dto.department),
     active: dto.active,
     createdAt: toDate(dto.createdAt, 'employee.createdAt'),
@@ -172,12 +182,25 @@ export function mapReport(dto: ReportDto): RiskReport {
   return {
     id: toInteger(dto.id, 'report.id'),
     reporter: mapEmployee(dto.reporter),
-    subCategory: mapSubcategory(dto.subCategory),
+    category: toEnum(dto.category, RISK_CATEGORIES, 'report.category'),
+    subCategory: dto.subCategory ? mapSubcategory(dto.subCategory) : null,
     reportedEvaluation,
     auditorEvaluation,
-    description: dto.description,
+    cause: dto.cause,
+    consequences: dto.consequences,
+    assignedDepartment: toOptionalText(dto.assignedDepartment),
     status: toEnum(dto.status, REPORT_STATUSES, 'report.status'),
     submittedAt: toDate(dto.submittedAt, 'report.submittedAt'),
+    dueDate: toDate(dto.dueDate, 'report.dueDate'),
+    sendReminderEmails: dto.sendReminderEmails,
+    lastReminderSentAt: dto.lastReminderSentAt
+      ? toDate(dto.lastReminderSentAt, 'report.lastReminderSentAt')
+      : null,
+    reminderTemplateId:
+      dto.reminderTemplateId === null || dto.reminderTemplateId === undefined
+        ? null
+        : toInteger(dto.reminderTemplateId, 'report.reminderTemplateId'),
+    ownerEmails: dto.ownerEmails,
     effectiveEvaluation: auditorEvaluation ?? reportedEvaluation,
   }
 }

@@ -68,8 +68,8 @@ function ReportsTable({
         <table className="w-full text-start text-sm">
           <thead>
             <tr className="border-b border-border-subtle bg-surface-muted text-xs text-ink-muted">
-              <Th>{t("report.description")}</Th>
-              <Th>{t("report.subcategory")}</Th>
+              <Th>{t("report.cause")}</Th>
+              <Th>{t("report.category")}</Th>
               <Th>{t("report.status")}</Th>
               <Th>{t("report.submittedAt")}</Th>
             </tr>
@@ -85,10 +85,10 @@ function ReportsTable({
                     to={`/reports/${report.id}`}
                     className="font-medium text-accent hover:underline"
                   >
-                    {truncate(report.description)}
+                    {truncate(report.cause)}
                   </Link>
                 </Td>
-                <Td className="text-ink-muted">{report.subCategory.nameEn}</Td>
+                <Td className="text-ink-muted">{t(`riskCategory.${report.category}`)}</Td>
                 <Td>
                   <StatusBadge status={report.status} />
                 </Td>

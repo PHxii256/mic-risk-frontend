@@ -9,12 +9,14 @@ import {
   mapEmployeeDepartmentStats,
   mapEngagement,
   mapEngagementStats,
+  mapEmailReminderTemplate,
   mapResource,
   mapRiskAction,
   type ActionStatus,
   type AnalyticsDashboard,
   type DepartmentEngagement,
   type EmployeeDepartmentStats,
+  type EmailReminderTemplate,
   type ResourceEngagement,
   type ResourceEngagementStats,
 } from '@/domain/models'
@@ -35,6 +37,7 @@ export const keys = {
   reports: (status: string | null, page: number, search: string, sortBy: string, sortDir: string) =>
     ['reports', 'all', status, page, search, sortBy, sortDir] as const,
   employees: ['employees'] as const,
+  emailTemplates: ['emailReminderTemplates'] as const,
   departments: ['departments'] as const,
   actionsByReport: (reportId: number) => ['actions', 'byReport', reportId] as const,
   actionSummary: ['actions', 'summary'] as const,
@@ -129,11 +132,16 @@ export function useUpdateReportStatus(reportId: number) {
 
 /* ------------------------------------------------------------------ employees */
 
-export function useEmployees() {
+export function useEmployees(search = '') {
   return useQuery({
-    queryKey: keys.employees,
+    queryKey: [...keys.employees, search],
     queryFn: async ({ signal }): Promise<Employee[]> => {
-      const data = await unwrap(api.GET('/api/employee', { signal }))
+      const data = await unwrap(
+        api.GET('/api/employee', {
+          params: { query: search ? { search } : {} },
+          signal,
+        }),
+      )
       return data.map(mapEmployee)
     },
   })
@@ -144,6 +152,7 @@ export interface CreateEmployeeInput {
   name: string
   deptId: number
   role: string
+  jobTitle?: string | null
 }
 
 export function useCreateEmployee() {
@@ -162,12 +171,12 @@ export function useUpdateEmployee() {
 
   return useMutation({
     mutationKey: ['employees', 'update'],
-    mutationFn: async (input: { id: number; name: string; deptId: number; active: boolean }) =>
+    mutationFn: async (input: { id: number; name: string; jobTitle: string | null; deptId: number; active: boolean }) =>
       mapEmployee(
         await unwrap(
           api.PUT('/api/employee/{id}', {
             params: { path: { id: input.id } },
-            body: { name: input.name, deptId: input.deptId, active: input.active },
+            body: { name: input.name, jobTitle: input.jobTitle, deptId: input.deptId, active: input.active },
           }),
         ),
       ),
@@ -200,6 +209,85 @@ export function useResetEmployeePassword() {
       requestJson<void>('POST', `/api/employee/${input.id}/reset-password`, {
         newPassword: input.newPassword,
       }),
+  })
+}
+
+export interface EmployeeImportResult {
+  totalRows: number
+  created: number
+  skipped: number
+  failed: number
+  errors: { row: number; email: string | null; message: string }[]
+}
+
+export function useImportEmployees() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['employees', 'import'],
+    mutationFn: async (file: File): Promise<EmployeeImportResult> => {
+      const result = await uploadFile<components['schemas']['EmployeeImportResultDto']>(
+        '/api/employee/import',
+        { file },
+      )
+      return {
+        totalRows: Number(result.totalRows),
+        created: Number(result.created),
+        skipped: Number(result.skipped),
+        failed: Number(result.failed),
+        errors: result.errors.map((error) => ({
+          row: Number(error.row),
+          email: error.email,
+          message: error.message,
+        })),
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: keys.employees })
+      void queryClient.invalidateQueries({ queryKey: keys.departments })
+    },
+  })
+}
+
+/* ------------------------------------------------------ email reminder templates */
+
+export function useEmailReminderTemplates(options: { enabled?: boolean } = {}) {
+  return useQuery({
+    queryKey: keys.emailTemplates,
+    enabled: options.enabled ?? true,
+    queryFn: async ({ signal }): Promise<EmailReminderTemplate[]> => {
+      const data = await unwrap(api.GET('/api/email-reminder-template', { signal }))
+      return data.map(mapEmailReminderTemplate)
+    },
+  })
+}
+
+export function useSaveEmailReminderTemplate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['emailReminderTemplates', 'save'],
+    mutationFn: async (input: { id?: number; name: string; subject: string; body: string }) => {
+      const body = { name: input.name, subject: input.subject, body: input.body }
+      const data = input.id === undefined
+        ? await unwrap(api.POST('/api/email-reminder-template', { body }))
+        : await unwrap(api.PUT('/api/email-reminder-template/{id}', {
+            params: { path: { id: input.id } },
+            body,
+          }))
+      return mapEmailReminderTemplate(data)
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: keys.emailTemplates }),
+  })
+}
+
+export function useDeleteEmailReminderTemplate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['emailReminderTemplates', 'delete'],
+    mutationFn: async (id: number) => {
+      await unwrap(api.DELETE('/api/email-reminder-template/{id}', { params: { path: { id } } }))
+    },
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: keys.emailTemplates }),
   })
 }
 

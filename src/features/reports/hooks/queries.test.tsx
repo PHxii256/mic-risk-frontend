@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { useRiskCategories } from './queries'
 
 const server = setupServer(
-  http.get('http://localhost:5166/api/risk-subcategory/categories', () =>
+  http.get('http://localhost/api/risk-subcategory/categories', () =>
     HttpResponse.json([
       {
         nameEn: 'Financial',

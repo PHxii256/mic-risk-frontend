@@ -4,6 +4,7 @@ import { AppShell } from '@/components/app/AppShell'
 import { ChangePasswordPage } from '@/features/account/ChangePasswordPage'
 import { DepartmentsPage } from '@/features/admin/DepartmentsPage'
 import { EmployeesPage } from '@/features/admin/EmployeesPage'
+import { EmailTemplatesPage } from '@/features/admin/EmailTemplatesPage'
 import { TaxonomyPage } from '@/features/admin/TaxonomyPage'
 import { AnalyticsPage } from '@/features/analytics/AnalyticsPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
                   { path: 'admin/reports', element: <AllReportsPage /> },
                   { path: 'admin/analytics', element: <AnalyticsPage /> },
                   { path: 'admin/employees', element: <EmployeesPage /> },
+                  { path: 'admin/email-templates', element: <EmailTemplatesPage /> },
                   { path: 'admin/departments', element: <DepartmentsPage /> },
                   { path: 'admin/taxonomy', element: <TaxonomyPage /> },
                 ],

@@ -5,8 +5,17 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
+const backendSiteRoot = fileURLToPath(new URL('../MIC.risk-backend/wwwroot/site', import.meta.url))
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+
+  build: {
+    // Keep compiled SPA assets separate from runtime uploads. Vite can safely empty this
+    // directory on every build without deleting anything under wwwroot/uploads.
+    outDir: backendSiteRoot,
+    emptyOutDir: true,
+  },
 
   resolve: {
     alias: {

@@ -20,6 +20,7 @@ function authPayload(overrides: { expiresInMs?: number; token?: string } = {}) {
       identityUserId: 'u1',
       email: 'user@mic.test',
       name: 'Plain User',
+      jobTitle: null,
       department: { id: 1, name: 'Risk', branchLocation: 'HQ' },
       active: true,
       createdAt: '2026-08-18T10:51:48+03:00',

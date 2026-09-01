@@ -17,6 +17,7 @@ const employeeDto = {
   identityUserId: 'u1',
   email: 'user@mic.test',
   name: 'Plain User',
+  jobTitle: null,
   department: { id: '1', name: 'Risk', branchLocation: 'HQ' },
   active: true,
   createdAt: '2026-08-18T10:51:48.3768637+03:00',
@@ -41,6 +42,7 @@ const evaluationDto = {
 const reportDto = {
   id: 1,
   reporter: employeeDto,
+  category: 'Financial',
   subCategory: {
     id: 1,
     nameEn: 'Fraud',
@@ -49,9 +51,16 @@ const reportDto = {
   },
   reportedEvaluation: evaluationDto,
   auditorEvaluation: null,
-  description: 'Test risk',
+  cause: 'Test cause',
+  consequences: 'Test consequences',
+  assignedDepartment: null,
   status: 'Submitted',
   submittedAt: '2026-08-18T09:00:00+00:00',
+  dueDate: '2026-08-25T09:00:00+00:00',
+  sendReminderEmails: true,
+  lastReminderSentAt: null,
+  reminderTemplateId: null,
+  ownerEmails: ['owner@mohins.com'],
 }
 
 describe('canTransition', () => {
@@ -123,7 +132,20 @@ describe('mapReport', () => {
 
     expect(report.status).toBe('Submitted')
     expect(report.auditorEvaluation).toBeNull()
-    expect(report.subCategory.category).toBe('Financial')
+    expect(report.category).toBe('Financial')
+    expect(report.subCategory?.category).toBe('Financial')
+  })
+
+  it('maps cause, consequences, and a null assigned department', () => {
+    const report = mapReport(reportDto)
+    expect(report.cause).toBe('Test cause')
+    expect(report.consequences).toBe('Test consequences')
+    expect(report.assignedDepartment).toBeNull()
+  })
+
+  it('maps an assigned department string without treating it as an enum', () => {
+    const report = mapReport({ ...reportDto, assignedDepartment: 'ادارة المخاطر' })
+    expect(report.assignedDepartment).toBe('ادارة المخاطر')
   })
 
   // The auditor's assessment is authoritative once it exists; every score shown on the report
@@ -154,12 +176,7 @@ describe('mapReport', () => {
     expect(() =>
       mapReport({
         ...reportDto,
-        subCategory: {
-          id: 1,
-          nameEn: 'X',
-          nameAr: 'س',
-          category: 'Reputational',
-        },
+        category: 'Reputational',
       }),
     ).toThrow(ContractViolationError)
   })

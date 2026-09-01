@@ -75,6 +75,14 @@ export function AnalyticsPage() {
       },
       countSheet(t('analytics.byDepartment'), data.risksByDepartment, t),
       countSheet(t('analytics.byLocation'), data.risksByLocation, t),
+      countSheet(
+        t('analytics.byCategory'),
+        data.categoryDistribution.map((item) => ({
+          ...item,
+          label: t(`riskCategory.${item.label}`),
+        })),
+        t,
+      ),
       countSheet(t('analytics.bySubcategory'), data.subcategoryDistribution, t),
       {
         name: t('analytics.maturity'),
@@ -236,6 +244,10 @@ function countSheet(
 
 function Dashboard({ data }: { data: AnalyticsDashboard }) {
   const { t, i18n } = useTranslation()
+  const localizedCategoryDistribution = data.categoryDistribution.map((item) => ({
+    ...item,
+    label: t(`riskCategory.${item.label}`),
+  }))
 
   return (
     <div className="space-y-4">
@@ -297,6 +309,7 @@ function Dashboard({ data }: { data: AnalyticsDashboard }) {
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title={t('analytics.byDepartment')} data={data.risksByDepartment} />
         <ChartCard title={t('analytics.byLocation')} data={data.risksByLocation} />
+        <ChartCard title={t('analytics.byCategory')} data={localizedCategoryDistribution} />
         <ChartCard title={t('analytics.bySubcategory')} data={data.subcategoryDistribution} />
         <ChartCard
           title={t('analytics.maturity')}

@@ -40,10 +40,13 @@ export function LoginPage() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-canvas px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-baseline justify-between">
-          <div>
-            <h1 className="text-base font-semibold text-ink">{t('app.name')}</h1>
-            <p className="text-xs text-ink-subtle">{t('app.tagline')}</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src="/logoonly.svg" alt={t('app.logoAlt')} className="h-6" />
+            <div>
+              <h1 className="text-base font-semibold text-ink">{t('app.name')}</h1>
+              <p className="text-xs text-ink-subtle">{t('app.tagline')}</p>
+            </div>
           </div>
           <LocaleSwitch />
         </div>

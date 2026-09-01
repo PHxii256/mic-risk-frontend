@@ -34,33 +34,7 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content: {
-                        "text/plain": components["schemas"]["AuthResponseDto"];
-                        "application/json": components["schemas"]["AuthResponseDto"];
-                        "text/json": components["schemas"]["AuthResponseDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
-                    };
+                    content?: never;
                 };
             };
         };
@@ -520,7 +494,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/employee": {
+    "/api/email-reminder-template": {
         parameters: {
             query?: never;
             header?: never;
@@ -530,6 +504,216 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["EmailReminderTemplateDto"][];
+                        "application/json": components["schemas"]["EmailReminderTemplateDto"][];
+                        "text/json": components["schemas"]["EmailReminderTemplateDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                    "application/json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                    "text/json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                    "application/*+json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["EmailReminderTemplateDto"];
+                        "application/json": components["schemas"]["EmailReminderTemplateDto"];
+                        "text/json": components["schemas"]["EmailReminderTemplateDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/email-reminder-template/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["EmailReminderTemplateDto"];
+                        "application/json": components["schemas"]["EmailReminderTemplateDto"];
+                        "text/json": components["schemas"]["EmailReminderTemplateDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                    "application/json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                    "text/json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                    "application/*+json": components["schemas"]["SaveEmailReminderTemplateRequestDto"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["EmailReminderTemplateDto"];
+                        "application/json": components["schemas"]["EmailReminderTemplateDto"];
+                        "text/json": components["schemas"]["EmailReminderTemplateDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/employee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -575,6 +759,68 @@ export interface paths {
                         "text/plain": components["schemas"]["EmployeeResponseDto"];
                         "application/json": components["schemas"]["EmployeeResponseDto"];
                         "text/json": components["schemas"]["EmployeeResponseDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/employee/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        ContentType?: string;
+                        ContentDisposition?: string;
+                        Headers?: {
+                            [key: string]: string[];
+                        };
+                        /** Format: int64 */
+                        Length?: number | string;
+                        Name?: string;
+                        FileName?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["EmployeeImportResultDto"];
+                        "application/json": components["schemas"]["EmployeeImportResultDto"];
+                        "text/json": components["schemas"]["EmployeeImportResultDto"];
                     };
                 };
                 /** @description Bad Request */
@@ -1014,6 +1260,52 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/api/resource/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/resource/upload": {
@@ -1820,6 +2112,17 @@ export interface paths {
                         "text/json": components["schemas"]["RiskReportResponseDto"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
                 /** @description Not Found */
                 404: {
                     headers: {
@@ -1881,6 +2184,17 @@ export interface paths {
                         "text/json": components["schemas"]["RiskReportResponseDto"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
                 /** @description Not Found */
                 404: {
                     headers: {
@@ -1894,6 +2208,153 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/api/risk-report/{id}/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["UpdateRiskReminderSettingsRequestDto"];
+                    "application/json": components["schemas"]["UpdateRiskReminderSettingsRequestDto"];
+                    "text/json": components["schemas"]["UpdateRiskReminderSettingsRequestDto"];
+                    "application/*+json": components["schemas"]["UpdateRiskReminderSettingsRequestDto"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["RiskReportResponseDto"];
+                        "application/json": components["schemas"]["RiskReportResponseDto"];
+                        "text/json": components["schemas"]["RiskReportResponseDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/risk-report/{id}/department": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
+                    "application/json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
+                    "text/json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
+                    "application/*+json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["RiskReportResponseDto"];
+                        "application/json": components["schemas"]["RiskReportResponseDto"];
+                        "text/json": components["schemas"]["RiskReportResponseDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/risk-report/{id}/history": {
@@ -2251,6 +2712,7 @@ export interface components {
             risksSubmittedThisMonth: number | string;
             risksByDepartment: components["schemas"]["CountByLabelDto"][];
             risksByLocation: components["schemas"]["CountByLabelDto"][];
+            riskCategoryDistribution: components["schemas"]["CountByLabelDto"][];
             riskSubcategoryDistribution: components["schemas"]["CountByLabelDto"][];
             riskMaturityByDepartment: components["schemas"]["DepartmentMaturityDto"][];
             inherentRiskMatrix: components["schemas"]["InherentRiskMatrixDto"];
@@ -2282,6 +2744,7 @@ export interface components {
             /** Format: int64 */
             deptId: number | string;
             role: string;
+            jobTitle?: null | string;
         };
         CreateEvaluationRequestDto: {
             /** Format: int32 */
@@ -2316,10 +2779,18 @@ export interface components {
         CreateRiskReportRequestDto: {
             /** Format: int64 */
             empId: number | string;
-            /** Format: int64 */
-            subCategoryId: number | string;
+            category: string;
             evaluation: components["schemas"]["CreateEvaluationRequestDto"];
-            description: string;
+            cause: string;
+            consequences: string;
+            /** Format: date-time */
+            dueDate: null | string;
+            ownerEmails: null | string[];
+            assignedDepartment?: null | string;
+            /** @default true */
+            sendReminderEmails: boolean;
+            /** Format: int64 */
+            reminderTemplateId?: null | number | string;
         };
         CreateRiskSubcategoryRequestDto: {
             nameEn: string;
@@ -2360,6 +2831,17 @@ export interface components {
             /** Format: int32 */
             pendingReview: number | string;
         };
+        EmailReminderTemplateDto: {
+            /** Format: int64 */
+            id: number | string;
+            name: string;
+            subject: string;
+            body: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         EmployeeDepartmentStatsDto: {
             /** Format: int64 */
             departmentId: number | string;
@@ -2373,12 +2855,30 @@ export interface components {
             /** Format: int32 */
             riskReportCount: number | string;
         };
+        EmployeeImportErrorDto: {
+            /** Format: int32 */
+            row: number | string;
+            email: null | string;
+            message: string;
+        };
+        EmployeeImportResultDto: {
+            /** Format: int32 */
+            totalRows: number | string;
+            /** Format: int32 */
+            created: number | string;
+            /** Format: int32 */
+            skipped: number | string;
+            /** Format: int32 */
+            failed: number | string;
+            errors: components["schemas"]["EmployeeImportErrorDto"][];
+        };
         EmployeeResponseDto: {
             /** Format: int64 */
             id: number | string;
             identityUserId: string;
             email: string;
             name: string;
+            jobTitle: null | string;
             department: components["schemas"]["DepartmentResponseDto"];
             active: boolean;
             /** Format: date-time */
@@ -2551,13 +3051,24 @@ export interface components {
             /** Format: int64 */
             id: number | string;
             reporter: components["schemas"]["EmployeeResponseDto"];
-            subCategory: components["schemas"]["RiskSubcategoryResponseDto"];
+            category: string;
+            subCategory: null | components["schemas"]["RiskSubcategoryResponseDto"];
             reportedEvaluation: components["schemas"]["RiskReportEvaluationResponseDto"];
             auditorEvaluation: null | components["schemas"]["RiskReportEvaluationResponseDto"];
-            description: string;
+            cause: string;
+            consequences: string;
+            assignedDepartment: null | string;
             status: string;
             /** Format: date-time */
             submittedAt: string;
+            /** Format: date-time */
+            dueDate: string;
+            sendReminderEmails: boolean;
+            /** Format: date-time */
+            lastReminderSentAt: null | string;
+            /** Format: int64 */
+            reminderTemplateId: null | number | string;
+            ownerEmails: string[];
         };
         RiskReportStatusHistoryResponseDto: {
             /** Format: int64 */
@@ -2583,11 +3094,17 @@ export interface components {
             nameAr: string;
             category: string;
         };
+        SaveEmailReminderTemplateRequestDto: {
+            name: string;
+            subject: string;
+            body: string;
+        };
         UpdateEmployeeRequestDto: {
             name: string;
             /** Format: int64 */
             deptId: number | string;
             active: boolean;
+            jobTitle?: null | string;
         };
         UpdateRiskActionRequestDto: {
             title: string;
@@ -2597,6 +3114,17 @@ export interface components {
             /** Format: date-time */
             dueDate: string;
             status: string;
+        };
+        UpdateRiskReminderSettingsRequestDto: {
+            /** Format: date-time */
+            dueDate: string;
+            ownerEmails: string[];
+            sendReminderEmails: boolean;
+            /** Format: int64 */
+            reminderTemplateId: null | number | string;
+        };
+        UpdateRiskDepartmentRequestDto: {
+            assignedDepartment: null | string;
         };
         UpdateRiskReportStatusRequestDto: {
             newStatus: string;
