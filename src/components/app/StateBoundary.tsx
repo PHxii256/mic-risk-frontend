@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { isCancelledError } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiError, NetworkError } from "@/api/errors";
@@ -28,6 +29,9 @@ export function StateBoundary<T>({
   onRetry?: () => void;
   children: (data: T) => ReactNode;
 }) {
+  if (isCancellationError(error)) {
+    return data === undefined ? <>{skeleton}</> : <>{children(data)}</>;
+  }
   if (isLoading) return <>{skeleton}</>;
   if (error) return <ErrorState error={error} onRetry={onRetry} />;
   if (data === undefined)
@@ -35,6 +39,15 @@ export function StateBoundary<T>({
   if (isEmpty?.(data)) return <>{empty ?? <EmptyState />}</>;
 
   return <>{children(data)}</>;
+}
+
+function isCancellationError(error: unknown): boolean {
+  return (
+    isCancelledError(error) ||
+    (typeof DOMException !== "undefined" &&
+      error instanceof DOMException &&
+      error.name === "AbortError")
+  );
 }
 
 export function EmptyState({

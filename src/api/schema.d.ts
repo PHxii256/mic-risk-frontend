@@ -1935,9 +1935,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["RiskReportResponseDto"][];
-                        "application/json": components["schemas"]["RiskReportResponseDto"][];
-                        "text/json": components["schemas"]["RiskReportResponseDto"][];
+                        "text/plain": components["schemas"]["PagedResultDtoOfRiskReportResponseDto"];
+                        "application/json": components["schemas"]["PagedResultDtoOfRiskReportResponseDto"];
+                        "text/json": components["schemas"]["PagedResultDtoOfRiskReportResponseDto"];
                     };
                 };
                 /** @description Not Found */
@@ -2260,74 +2260,6 @@ export interface paths {
                 };
                 /** @description Forbidden */
                 403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/risk-report/{id}/department": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json-patch+json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
-                    "application/json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
-                    "text/json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
-                    "application/*+json": components["schemas"]["UpdateRiskDepartmentRequestDto"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["RiskReportResponseDto"];
-                        "application/json": components["schemas"]["RiskReportResponseDto"];
-                        "text/json": components["schemas"]["RiskReportResponseDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2781,12 +2713,10 @@ export interface components {
             empId: number | string;
             category: string;
             evaluation: components["schemas"]["CreateEvaluationRequestDto"];
-            cause: string;
-            consequences: string;
+            description: string;
             /** Format: date-time */
             dueDate: null | string;
             ownerEmails: null | string[];
-            assignedDepartment?: null | string;
             /** @default true */
             sendReminderEmails: boolean;
             /** Format: int64 */
@@ -3055,9 +2985,7 @@ export interface components {
             subCategory: null | components["schemas"]["RiskSubcategoryResponseDto"];
             reportedEvaluation: components["schemas"]["RiskReportEvaluationResponseDto"];
             auditorEvaluation: null | components["schemas"]["RiskReportEvaluationResponseDto"];
-            cause: string;
-            consequences: string;
-            assignedDepartment: null | string;
+            description: string;
             status: string;
             /** Format: date-time */
             submittedAt: string;
@@ -3122,9 +3050,6 @@ export interface components {
             sendReminderEmails: boolean;
             /** Format: int64 */
             reminderTemplateId: null | number | string;
-        };
-        UpdateRiskDepartmentRequestDto: {
-            assignedDepartment: null | string;
         };
         UpdateRiskReportStatusRequestDto: {
             newStatus: string;

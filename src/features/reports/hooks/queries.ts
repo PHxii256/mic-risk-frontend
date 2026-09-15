@@ -62,13 +62,13 @@ export function useRiskCategories() {
   })
 }
 
-/** `/mine` returns a plain array, unlike the paged `/api/risk-report` an admin sees. */
+/** `/mine` returns the same paged envelope as the admin report list. */
 export function useMyReports() {
   return useQuery({
     queryKey: reportKeys.mine(),
     queryFn: async ({ signal }): Promise<RiskReport[]> => {
       const data = await unwrap(api.GET('/api/risk-report/mine', { signal }))
-      return data.map(mapReport)
+      return data.items.map(mapReport)
     },
   })
 }

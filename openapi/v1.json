@@ -2672,26 +2672,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RiskReportResponseDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultDtoOfRiskReportResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RiskReportResponseDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultDtoOfRiskReportResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RiskReportResponseDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultDtoOfRiskReportResponseDto"
                 }
               }
             }
