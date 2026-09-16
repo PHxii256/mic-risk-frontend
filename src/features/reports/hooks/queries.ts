@@ -107,9 +107,7 @@ export function useReportHistory(reportId: number, page = 1) {
 export interface CreateReportInput {
   empId: number
   category: RiskCategory
-  cause: string
-  consequences: string
-  assignedDepartment: string | null
+  description: string
   dueDate: string
   ownerEmails: string[]
   sendReminderEmails: boolean
@@ -136,9 +134,7 @@ export function useCreateReport() {
           body: {
             empId: input.empId,
             category: input.category,
-            cause: input.cause,
-            consequences: input.consequences,
-            assignedDepartment: input.assignedDepartment,
+            description: input.description,
             dueDate: input.dueDate,
             ownerEmails: input.ownerEmails,
             sendReminderEmails: input.sendReminderEmails,
@@ -185,28 +181,6 @@ export function useUpdateReminderSettings(reportId: number) {
     onSuccess: (report) => {
       queryClient.setQueryData(reportKeys.detail(report.id), report)
       void queryClient.invalidateQueries({ queryKey: reportKeys.mine() })
-    },
-  })
-}
-
-export function useUpdateAssignedDepartment(reportId: number) {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationKey: ['reports', 'department', reportId],
-    mutationFn: async (assignedDepartment: string | null): Promise<RiskReport> =>
-      mapReport(
-        await unwrap(
-          api.PUT('/api/risk-report/{id}/department', {
-            params: { path: { id: reportId } },
-            body: { assignedDepartment },
-          }),
-        ),
-      ),
-    onSuccess: (report) => {
-      queryClient.setQueryData(reportKeys.detail(report.id), report)
-      void queryClient.invalidateQueries({ queryKey: reportKeys.mine() })
-      void queryClient.invalidateQueries({ queryKey: ['reports', 'all'] })
     },
   })
 }

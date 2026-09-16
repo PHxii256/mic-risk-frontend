@@ -44,9 +44,7 @@ const mineReport = {
     evaluatedAt: "2026-09-15T07:11:05.144Z",
   },
   auditorEvaluation: null,
-  cause: "Test cause",
-  consequences: "Test consequences",
-  assignedDepartment: null,
+  description: "Test description",
   status: "Submitted",
   submittedAt: "2026-09-15T07:11:05.144Z",
   dueDate: "2026-09-15T07:11:05.144Z",
@@ -119,7 +117,7 @@ describe("useMyReports", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data?.[0].id).toBe(1);
+    expect(result.current.data?.[0]?.id).toBe(1);
 
     queryClient.clear();
   });

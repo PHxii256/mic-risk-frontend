@@ -85,10 +85,12 @@ function ReportsTable({
                     to={`/reports/${report.id}`}
                     className="font-medium text-accent hover:underline"
                   >
-                    {truncate(report.cause)}
+                    {truncate(report.description)}
                   </Link>
                 </Td>
-                <Td className="text-ink-muted">{t(`riskCategory.${report.category}`)}</Td>
+                <Td className="text-ink-muted">
+                  {t(`riskCategory.${report.category}`)}
+                </Td>
                 <Td>
                   <StatusBadge status={report.status} />
                 </Td>

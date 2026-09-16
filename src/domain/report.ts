@@ -90,9 +90,7 @@ export interface RiskReport {
   subCategory: Subcategory | null
   reportedEvaluation: Evaluation
   auditorEvaluation: Evaluation | null
-  cause: string
-  consequences: string
-  assignedDepartment: string | null
+  description: string
   status: ReportStatus
   submittedAt: Date
   dueDate: Date
@@ -173,6 +171,7 @@ export function mapEvaluation(dto: EvaluationDto): Evaluation {
 }
 
 export function mapReport(dto: ReportDto): RiskReport {
+  const legacyDto = dto as ReportDto & { cause?: string }
   const reportedEvaluation = mapEvaluation(dto.reportedEvaluation)
   const auditorEvaluation =
     dto.auditorEvaluation === null || dto.auditorEvaluation === undefined
@@ -186,9 +185,7 @@ export function mapReport(dto: ReportDto): RiskReport {
     subCategory: dto.subCategory ? mapSubcategory(dto.subCategory) : null,
     reportedEvaluation,
     auditorEvaluation,
-    cause: dto.cause,
-    consequences: dto.consequences,
-    assignedDepartment: toOptionalText(dto.assignedDepartment),
+    description: dto.description ?? legacyDto.cause ?? '',
     status: toEnum(dto.status, REPORT_STATUSES, 'report.status'),
     submittedAt: toDate(dto.submittedAt, 'report.submittedAt'),
     dueDate: toDate(dto.dueDate, 'report.dueDate'),

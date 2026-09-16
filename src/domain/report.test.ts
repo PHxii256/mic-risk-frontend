@@ -51,9 +51,7 @@ const reportDto = {
   },
   reportedEvaluation: evaluationDto,
   auditorEvaluation: null,
-  cause: 'Test cause',
-  consequences: 'Test consequences',
-  assignedDepartment: null,
+  description: 'Test description',
   status: 'Submitted',
   submittedAt: '2026-08-18T09:00:00+00:00',
   dueDate: '2026-08-25T09:00:00+00:00',
@@ -136,16 +134,16 @@ describe('mapReport', () => {
     expect(report.subCategory?.category).toBe('Financial')
   })
 
-  it('maps cause, consequences, and a null assigned department', () => {
+  it('maps the report description', () => {
     const report = mapReport(reportDto)
-    expect(report.cause).toBe('Test cause')
-    expect(report.consequences).toBe('Test consequences')
-    expect(report.assignedDepartment).toBeNull()
+    expect(report.description).toBe('Test description')
   })
 
-  it('maps an assigned department string without treating it as an enum', () => {
-    const report = mapReport({ ...reportDto, assignedDepartment: 'ادارة المخاطر' })
-    expect(report.assignedDepartment).toBe('ادارة المخاطر')
+  it('falls back to the legacy cause field when description is absent', () => {
+    const report = mapReport(
+      { ...reportDto, description: undefined, cause: 'Legacy cause' } as unknown as Parameters<typeof mapReport>[0],
+    )
+    expect(report.description).toBe('Legacy cause')
   })
 
   // The auditor's assessment is authoritative once it exists; every score shown on the report
