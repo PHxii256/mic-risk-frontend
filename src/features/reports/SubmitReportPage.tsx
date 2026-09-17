@@ -104,7 +104,7 @@ export function SubmitReportPage() {
         category: parsed.category,
         cause: parsed.cause,
         consequences: parsed.consequences,
-        description: `Cause:\n${parsed.cause}\n\nConsequences:\n${parsed.consequences}`,
+        assignedDepartment: null,
         dueDate: new Date(`${parsed.dueDate}T23:59:59`).toISOString(),
         ownerEmails: isAdmin ? parsed.owners.map((owner) => owner.email) : [],
         sendReminderEmails: isAdmin ? parsed.sendReminderEmails : false,

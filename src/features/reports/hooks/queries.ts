@@ -109,7 +109,7 @@ export interface CreateReportInput {
   category: RiskCategory
   cause: string
   consequences: string
-  description: string
+  assignedDepartment: string | null
   dueDate: string
   ownerEmails: string[]
   sendReminderEmails: boolean
@@ -138,7 +138,7 @@ export function useCreateReport() {
             category: input.category,
             cause: input.cause,
             consequences: input.consequences,
-            description: input.description,
+            assignedDepartment: input.assignedDepartment,
             dueDate: input.dueDate,
             ownerEmails: input.ownerEmails,
             sendReminderEmails: input.sendReminderEmails,

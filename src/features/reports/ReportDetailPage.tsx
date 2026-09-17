@@ -73,10 +73,19 @@ function ReportDetail({ report }: { report: RiskReport }) {
         <CardBody className="space-y-4">
           <section className="space-y-1">
             <h3 className="text-xs font-medium text-ink-muted">
-              {t("report.description")}
+              {t("report.cause")}
             </h3>
             <p className="whitespace-pre-wrap text-sm text-ink">
-              {report.description}
+              {report.cause}
+            </p>
+          </section>
+
+          <section className="space-y-1">
+            <h3 className="text-xs font-medium text-ink-muted">
+              {t("report.consequences")}
+            </h3>
+            <p className="whitespace-pre-wrap text-sm text-ink">
+              {report.consequences}
             </p>
           </section>
 

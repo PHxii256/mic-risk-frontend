@@ -122,7 +122,7 @@ export function DashboardPage() {
                         to={`/reports/${report.id}`}
                         className="font-medium text-accent hover:underline"
                       >
-                        {truncate(report.description)}
+                        {truncate(report.cause)}
                       </Link>
                     </Td>
                     <Td className="whitespace-nowrap text-ink-muted">

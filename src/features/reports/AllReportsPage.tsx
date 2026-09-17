@@ -200,7 +200,7 @@ export function AllReportsPage() {
           <div>
             <TableShell>
               <HeadRow>
-                <SortableTh label={t("report.description")} />
+                <SortableTh label={t("report.cause")} />
                 <SortableTh
                   label={t("report.reporter")}
                   sortKey="reporter"
@@ -252,7 +252,7 @@ export function AllReportsPage() {
                         to={`/reports/${report.id}`}
                         className="font-medium text-accent hover:underline"
                       >
-                        {truncate(report.description)}
+                        {truncate(report.cause)}
                       </Link>
                     </Td>
                     <Td className="whitespace-nowrap text-ink-muted">
