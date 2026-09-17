@@ -107,6 +107,8 @@ export function useReportHistory(reportId: number, page = 1) {
 export interface CreateReportInput {
   empId: number
   category: RiskCategory
+  cause: string
+  consequences: string
   description: string
   dueDate: string
   ownerEmails: string[]
@@ -134,6 +136,8 @@ export function useCreateReport() {
           body: {
             empId: input.empId,
             category: input.category,
+            cause: input.cause,
+            consequences: input.consequences,
             description: input.description,
             dueDate: input.dueDate,
             ownerEmails: input.ownerEmails,

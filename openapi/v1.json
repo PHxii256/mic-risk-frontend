@@ -4077,6 +4077,8 @@
           "empId",
           "category",
           "evaluation",
+          "cause",
+          "consequences",
           "description",
           "dueDate",
           "ownerEmails"
@@ -4096,6 +4098,12 @@
           },
           "evaluation": {
             "$ref": "#/components/schemas/CreateEvaluationRequestDto"
+          },
+          "cause": {
+            "type": "string"
+          },
+          "consequences": {
+            "type": "string"
           },
           "description": {
             "type": "string"

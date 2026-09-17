@@ -33,7 +33,8 @@ import { useCreateReport } from "./hooks/queries";
 function reportSchema(isAdmin: boolean) {
   return evaluationSchema.extend({
     category: z.enum(RISK_CATEGORIES),
-    description: z.string().trim().min(1),
+    cause: z.string().trim().min(1),
+    consequences: z.string().trim().min(1),
     dueDate: isAdmin ? z.string().min(1) : z.string(),
     owners: isAdmin
       ? z.array(z.object({ email: z.string().trim().email() })).min(1)
@@ -68,7 +69,8 @@ export function SubmitReportPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       category: "" as unknown as (typeof RISK_CATEGORIES)[number],
-      description: "",
+      cause: "",
+      consequences: "",
       dueDate: defaultDueDate(),
       owners: [{ email: "@mohins.com" }],
       sendReminderEmails: true,
@@ -100,7 +102,9 @@ export function SubmitReportPage() {
       {
         empId: employeeId,
         category: parsed.category,
-        description: parsed.description,
+        cause: parsed.cause,
+        consequences: parsed.consequences,
+        description: `Cause:\n${parsed.cause}\n\nConsequences:\n${parsed.consequences}`,
         dueDate: new Date(`${parsed.dueDate}T23:59:59`).toISOString(),
         ownerEmails: isAdmin ? parsed.owners.map((owner) => owner.email) : [],
         sendReminderEmails: isAdmin ? parsed.sendReminderEmails : false,
@@ -154,17 +158,34 @@ export function SubmitReportPage() {
             </Field>
 
             <Field
-              htmlFor="description"
-              label={t("report.description")}
+              htmlFor="cause"
+              label={t("report.cause")}
+              hint={t("report.causeHint")}
               required
-              error={errors.description ? t("form.required") : undefined}
+              error={errors.cause ? t("form.required") : undefined}
             >
               <Textarea
-                id="description"
-                rows={6}
+                id="cause"
+                rows={4}
                 aria-required="true"
-                aria-invalid={errors.description ? true : undefined}
-                {...register("description")}
+                aria-invalid={errors.cause ? true : undefined}
+                {...register("cause")}
+              />
+            </Field>
+
+            <Field
+              htmlFor="consequences"
+              label={t("report.consequences")}
+              hint={t("report.consequencesHint")}
+              required
+              error={errors.consequences ? t("form.required") : undefined}
+            >
+              <Textarea
+                id="consequences"
+                rows={4}
+                aria-required="true"
+                aria-invalid={errors.consequences ? true : undefined}
+                {...register("consequences")}
               />
             </Field>
           </CardBody>

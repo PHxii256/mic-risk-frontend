@@ -2713,6 +2713,8 @@ export interface components {
             empId: number | string;
             category: string;
             evaluation: components["schemas"]["CreateEvaluationRequestDto"];
+            cause: string;
+            consequences: string;
             description: string;
             /** Format: date-time */
             dueDate: null | string;
