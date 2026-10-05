@@ -72,6 +72,8 @@ export interface Resource {
   url: string
   type: string
   description: string | null
+  isNews: boolean
+  isLecture: boolean
   uploadedAt: Date
 }
 
@@ -83,6 +85,8 @@ export function mapResource(dto: ResourceDto): Resource {
     url: dto.url,
     type: dto.type,
     description: toOptionalText(dto.description),
+    isNews: dto.isNews,
+    isLecture: dto.isLecture,
     uploadedAt: toDate(dto.uploadedAt, 'resource.uploadedAt'),
   }
 }

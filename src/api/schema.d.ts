@@ -1332,6 +1332,10 @@ export interface paths {
                         name?: string;
                     } & {
                         description?: string;
+                    } & {
+                        isNews?: boolean;
+                    } & {
+                        isLecture?: boolean;
                     };
                 };
             };
@@ -2772,6 +2776,10 @@ export interface components {
             url: string;
             type: string;
             description?: null | string;
+            /** @default false */
+            isNews: boolean;
+            /** @default false */
+            isLecture: boolean;
         };
         CreateRiskActionRequestDto: {
             /** Format: int64 */
@@ -2936,6 +2944,8 @@ export interface components {
         PatchResourceRequestDto: {
             name?: null | string;
             description?: null | string;
+            isNews?: null | boolean;
+            isLecture?: null | boolean;
         };
         ProblemDetails: {
             type?: null | string;
@@ -2995,6 +3005,8 @@ export interface components {
             url: string;
             type: string;
             description: null | string;
+            isNews: boolean;
+            isLecture: boolean;
             /** Format: date-time */
             uploadedAt: string;
         };

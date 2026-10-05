@@ -492,6 +492,8 @@ export function useCreateLinkResource() {
       url: string
       type: string
       description: string | null
+      isNews: boolean
+      isLecture: boolean
     }) => mapResource(await unwrap(api.POST('/api/resource', { body: input }))),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: keys.resources }),
   })
@@ -523,12 +525,20 @@ export function useUploadResource() {
 
   return useMutation({
     mutationKey: ['resources', 'upload'],
-    mutationFn: async (input: { file: File; name: string; description: string }) =>
+    mutationFn: async (input: {
+      file: File
+      name: string
+      description: string
+      isNews?: boolean
+      isLecture?: boolean
+    }) =>
       mapResource(
         await uploadFile<components['schemas']['ResourceResponseDto']>('/api/resource/upload', {
           file: input.file,
           name: input.name,
           description: input.description,
+          isNews: String(input.isNews ?? false),
+          isLecture: String(input.isLecture ?? false),
         }),
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: keys.resources }),

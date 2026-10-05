@@ -1,45 +1,69 @@
-import { Check, ClipboardList, Download, ExternalLink, Eye, Plus, Trash2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ClipboardList,
+  Download,
+  ExternalLink,
+  Eye,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { downloadFile } from '@/api/client'
-import { StateBoundary } from '@/components/app/StateBoundary'
-import { Button, Card, CardBody, Skeleton, Spinner } from '@/components/ui/primitives'
+import { downloadFile } from "@/api/client";
+import { Pagination } from "@/components/app/DataTable";
+import { StateBoundary } from "@/components/app/StateBoundary";
+import {
+  Button,
+  Card,
+  CardBody,
+  Skeleton,
+  Spinner,
+} from "@/components/ui/primitives";
+import { Tabs, type TabDefinition } from "@/components/ui/tabs";
 import {
   useDeleteResource,
   useEngagementStats,
   useMyEngagement,
   useRecordEngagement,
   useResources,
-} from '@/features/admin/hooks'
-import {
-  useCurrentEmployeeId,
-  useIsAdmin,
-} from '@/features/auth/useSession'
-import { formatDate, formatNumber } from '@/lib/format'
+} from "@/features/admin/hooks";
+import { useCurrentEmployeeId, useIsAdmin } from "@/features/auth/useSession";
+import { formatDate, formatNumber } from "@/lib/format";
 
-import { CreateResourcePanel } from './CreateResourcePanel'
+import { CreateResourcePanel } from "./CreateResourcePanel";
+
+const PAGE_SIZE = 12;
+type ResourceFilter =
+  "all" | "lecture" | "brochure" | "link" | "file" | "survey";
 
 // Fallback to current window origin if API base URL isn't explicitly set in env
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-function Readership({ stats }: { stats?: { viewCount: number; eligibleEmployees: number } }) {
-  const { t, i18n } = useTranslation()
+function Readership({
+  stats,
+}: {
+  stats?: { viewCount: number; eligibleEmployees: number };
+}) {
+  const { t, i18n } = useTranslation();
 
-  if (!stats) return null
+  if (!stats) return null;
 
   const percentage =
     stats.eligibleEmployees === 0
       ? 0
-      : Math.round((stats.viewCount / stats.eligibleEmployees) * 100)
+      : Math.round((stats.viewCount / stats.eligibleEmployees) * 100);
 
   return (
     <div className="mt-2 border-t border-border-subtle pt-2">
       <p className="text-xs text-ink-muted" data-numeric>
-        {t('resource.viewedBy', {
+        {t("resource.viewedBy", {
           viewed: formatNumber(stats.viewCount, i18n.language),
           total: formatNumber(stats.eligibleEmployees, i18n.language),
-        })}{' '}
+        })}{" "}
         <span className="text-ink-subtle">({percentage}%)</span>
       </p>
 
@@ -50,119 +74,139 @@ function Readership({ stats }: { stats?: { viewCount: number; eligibleEmployees:
         />
       </div>
     </div>
-  )
+  );
 }
 
 function affordance(type: string) {
   switch (type) {
-    case 'Quiz':
+    case "Quiz":
       return {
-        labelKey: 'resource.takeSurvey',
+        labelKey: "resource.takeSurvey",
         icon: ClipboardList,
         isSurvey: true,
         isFile: false,
-      }
+      };
 
-    case 'Video':
+    case "Video":
       return {
-        labelKey: 'resource.watchVideo',
+        labelKey: "resource.watchVideo",
         icon: ExternalLink,
         isSurvey: false,
         isFile: false,
-      }
+      };
 
-    case 'Link':
+    case "Link":
       return {
-        labelKey: 'resource.open',
+        labelKey: "resource.open",
         icon: ExternalLink,
         isSurvey: false,
         isFile: false,
-      }
+      };
 
     default:
       // File and Image are stored on the server and served as downloads.
       return {
-        labelKey: 'resource.download',
+        labelKey: "resource.download",
         icon: Download,
         isSurvey: false,
         isFile: true,
-      }
+      };
   }
 }
 
 /** Resolves relative resource paths against the backend API base URL. */
 function resolveResourceUrl(url: string) {
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
   }
 
-  return new URL(url, API_BASE_URL).href
+  return new URL(url, API_BASE_URL).href;
 }
 
 /** Saves bytes already returned by the API without navigating away from the application. */
 function saveBlob(blob: Blob, fileName: string) {
-  const blobUrl = window.URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = blobUrl
-  anchor.download = fileName
-  anchor.style.display = 'none'
-  document.body.appendChild(anchor)
-  anchor.click()
-  anchor.remove()
-  window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000)
+  const blobUrl = window.URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = blobUrl;
+  anchor.download = fileName;
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
 }
 
 export function ResourcesPage() {
-  const { t, i18n } = useTranslation()
-  const isAdmin = useIsAdmin()
-  const employeeId = useCurrentEmployeeId()
+  const { t, i18n } = useTranslation();
+  const isAdmin = useIsAdmin();
+  const employeeId = useCurrentEmployeeId();
 
-  const resources = useResources()
-  const engagement = useMyEngagement()
-  const record = useRecordEngagement()
-  const remove = useDeleteResource()
-  const stats = useEngagementStats({ enabled: isAdmin })
-  const [uploading, setUploading] = useState(false)
-  const [downloadingId, setDownloadingId] = useState<number | null>(null)
-  const [downloadError, setDownloadError] = useState<string | null>(null)
+  const resources = useResources();
+  const engagement = useMyEngagement();
+  const record = useRecordEngagement();
+  const remove = useDeleteResource();
+  const stats = useEngagementStats({ enabled: isAdmin });
+  const [uploading, setUploading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<ResourceFilter>("all");
+  const [page, setPage] = useState(1);
+  const [newestFirst, setNewestFirst] = useState(true);
+
+  const filterTabs: TabDefinition<ResourceFilter>[] = [
+    { id: "all", label: t("resource.filterAll") },
+    { id: "lecture", label: t("resource.filterLectures") },
+    { id: "brochure", label: t("resource.filterBrochures") },
+    { id: "link", label: t("resource.filterLinks") },
+    { id: "file", label: t("resource.filterFiles") },
+    { id: "survey", label: t("resource.filterSurveys") },
+  ];
+
+  useEffect(() => setPage(1), [filter]);
 
   const engagementByResource = useMemo(() => {
-    const map = new Map<number, { viewed: boolean; surveyCompleted: boolean }>()
+    const map = new Map<
+      number,
+      { viewed: boolean; surveyCompleted: boolean }
+    >();
 
     for (const item of engagement.data ?? []) {
       map.set(item.resource.id, {
         viewed: item.viewed,
         surveyCompleted: item.surveyCompleted,
-      })
+      });
     }
 
-    return map
-  }, [engagement.data])
+    return map;
+  }, [engagement.data]);
 
   const statsByResource = useMemo(() => {
-    const map = new Map<number, { viewCount: number; eligibleEmployees: number }>()
+    const map = new Map<
+      number,
+      { viewCount: number; eligibleEmployees: number }
+    >();
 
     for (const item of stats.data ?? []) {
       map.set(item.resourceId, {
         viewCount: item.viewCount,
         eligibleEmployees: item.eligibleEmployees,
-      })
+      });
     }
 
-    return map
-  }, [stats.data])
+    return map;
+  }, [stats.data]);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-base font-semibold text-ink">
-          {t('nav.resources')}
+          {t("nav.resources")}
         </h1>
 
         {isAdmin ? (
           <Button type="button" onClick={() => setUploading(true)}>
             <Plus className="size-3.5" aria-hidden="true" />
-            {t('resource.add')}
+            {t("resource.add")}
           </Button>
         ) : null}
       </div>
@@ -172,10 +216,32 @@ export function ResourcesPage() {
       ) : null}
 
       {downloadError ? (
-        <p className="rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger" role="alert">
+        <p
+          className="rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger"
+          role="alert"
+        >
           {downloadError}
         </p>
       ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Tabs tabs={filterTabs} active={filter} onChange={setFilter} />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          aria-pressed={!newestFirst}
+          aria-label={t("resource.sortByDate")}
+          onClick={() => setNewestFirst((value) => !value)}
+        >
+          {newestFirst ? (
+            <ArrowDown className="size-3.5" aria-hidden="true" />
+          ) : (
+            <ArrowUp className="size-3.5" aria-hidden="true" />
+          )}
+          {newestFirst ? t("resource.newestFirst") : t("resource.oldestFirst")}
+        </Button>
+      </div>
 
       <StateBoundary
         isLoading={resources.isPending}
@@ -191,172 +257,218 @@ export function ResourcesPage() {
         }
         isEmpty={(list) => list.length === 0}
       >
-        {(list) => (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map((resource) => {
-              const mine = engagementByResource.get(resource.id)
-
-              const {
-                labelKey,
-                icon: ActionIcon,
-                isSurvey,
-                isFile,
-              } = affordance(resource.type)
-
+        {(list) => {
+          const filtered = list.filter((resource) => {
+            if (filter === "all") return true;
+            if (filter === "lecture") return resource.isLecture;
+            if (filter === "brochure") return resource.isNews;
+            if (filter === "survey") return resource.type === "Quiz";
+            if (filter === "link")
               return (
-                <Card key={resource.id} className="flex flex-col">
-                  <CardBody className="flex flex-1 flex-col gap-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h2 className="text-sm font-medium text-ink">
-                        {resource.name}
-                      </h2>
+                !resource.isNews &&
+                !resource.isLecture &&
+                (resource.type === "Link" || resource.type === "Video")
+              );
+            return (
+              !resource.isNews &&
+              !resource.isLecture &&
+              resource.type !== "Quiz" &&
+              resource.type !== "Link" &&
+              resource.type !== "Video"
+            );
+          });
+          const sorted = [...filtered].sort((left, right) => {
+            const difference =
+              left.uploadedAt.getTime() - right.uploadedAt.getTime();
+            return newestFirst ? -difference : difference;
+          });
+          const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+          const currentPage = Math.min(page, totalPages);
+          const paged = sorted.slice(
+            (currentPage - 1) * PAGE_SIZE,
+            currentPage * PAGE_SIZE,
+          );
 
-                      <span className="rounded-sm bg-surface-muted px-1.5 py-0.5 text-xs text-ink-muted">
-                        {resource.type}
-                      </span>
-                    </div>
+          if (filtered.length === 0) {
+            return (
+              <p className="rounded-sm border border-dashed border-border-subtle px-4 py-8 text-center text-sm text-ink-muted">
+                {t("resource.noResults")}
+              </p>
+            );
+          }
 
-                    {resource.description ? (
-                      <p className="text-xs text-ink-muted">
-                        {resource.description}
-                      </p>
-                    ) : null}
+          return (
+            <div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {paged.map((resource) => {
+                  const mine = engagementByResource.get(resource.id);
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-ink-subtle">
-                      <span>
-                        {formatDate(resource.uploadedAt, i18n.language)}
-                      </span>
+                  const {
+                    labelKey,
+                    icon: ActionIcon,
+                    isSurvey,
+                    isFile,
+                  } = affordance(resource.type);
 
-                      {mine?.viewed ? (
-                        <span className="inline-flex items-center gap-1 text-band-low">
-                          <Eye className="size-3" aria-hidden="true" />
-                          {t('resource.viewed')}
-                        </span>
-                      ) : null}
-                    </div>
+                  return (
+                    <Card key={resource.id} className="flex flex-col">
+                      <CardBody className="flex flex-1 flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h2 className="text-sm font-medium text-ink">
+                            {resource.name}
+                          </h2>
 
-                    <div className="mt-auto flex flex-wrap gap-1 pt-2">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        disabled={isFile && downloadingId === resource.id}
-                        onClick={async () => {
-                          if (isFile) {
-                            setDownloadError(null)
-                            setDownloadingId(resource.id)
+                          <span className="rounded-sm bg-surface-muted px-1.5 py-0.5 text-xs text-ink-muted">
+                            {resource.type}
+                          </span>
+                        </div>
 
-                            try {
-                              const downloaded = await downloadFile(
-                                `/api/resource/${resource.id}/download`,
-                              )
-                              saveBlob(downloaded.blob, downloaded.fileName ?? resource.name)
-                            } catch {
-                              setDownloadError(t('resource.downloadFailed'))
-                              return
-                            } finally {
-                              setDownloadingId(null)
-                            }
-                          } else {
-                            // Videos and regular links still open in a new tab.
-                            window.open(
-                              resolveResourceUrl(resource.url),
-                              '_blank',
-                              'noopener,noreferrer',
-                            )
-                          }
+                        {resource.description ? (
+                          <p className="text-xs text-ink-muted">
+                            {resource.description}
+                          </p>
+                        ) : null}
 
-                          if (employeeId !== null && !mine?.viewed) {
-                            record.mutate({
-                              empId: employeeId,
-                              resourceId: resource.id,
-                              viewed: true,
-                              surveyCompleted: isSurvey
-                                ? (mine?.surveyCompleted ?? false)
-                                : false,
-                            })
-                          }
-                        }}
-                      >
-                        {isFile && downloadingId === resource.id ? (
-                          <Spinner />
-                        ) : (
-                          <ActionIcon
-                            className="size-3.5"
-                            aria-hidden="true"
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-ink-subtle">
+                          <span>
+                            {formatDate(resource.uploadedAt, i18n.language)}
+                          </span>
+
+                          {mine?.viewed ? (
+                            <span className="inline-flex items-center gap-1 text-band-low">
+                              <Eye className="size-3" aria-hidden="true" />
+                              {t("resource.viewed")}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-auto flex flex-wrap gap-1 pt-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            disabled={isFile && downloadingId === resource.id}
+                            onClick={async () => {
+                              if (isFile) {
+                                setDownloadError(null);
+                                setDownloadingId(resource.id);
+
+                                try {
+                                  const downloaded = await downloadFile(
+                                    `/api/resource/${resource.id}/download`,
+                                  );
+                                  saveBlob(
+                                    downloaded.blob,
+                                    downloaded.fileName ?? resource.name,
+                                  );
+                                } catch {
+                                  setDownloadError(
+                                    t("resource.downloadFailed"),
+                                  );
+                                  return;
+                                } finally {
+                                  setDownloadingId(null);
+                                }
+                              } else {
+                                // Videos and regular links still open in a new tab.
+                                window.open(
+                                  resolveResourceUrl(resource.url),
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                );
+                              }
+
+                              if (employeeId !== null && !mine?.viewed) {
+                                record.mutate({
+                                  empId: employeeId,
+                                  resourceId: resource.id,
+                                  viewed: true,
+                                  surveyCompleted: isSurvey
+                                    ? (mine?.surveyCompleted ?? false)
+                                    : false,
+                                });
+                              }
+                            }}
+                          >
+                            {isFile && downloadingId === resource.id ? (
+                              <Spinner />
+                            ) : (
+                              <ActionIcon
+                                className="size-3.5"
+                                aria-hidden="true"
+                              />
+                            )}
+
+                            {isFile && downloadingId === resource.id
+                              ? t("resource.downloading")
+                              : t(labelKey)}
+                          </Button>
+
+                          {isSurvey && !isAdmin ? (
+                            <Button
+                              type="button"
+                              variant={
+                                mine?.surveyCompleted ? "primary" : "secondary"
+                              }
+                              size="sm"
+                              disabled={employeeId === null || record.isPending}
+                              onClick={() =>
+                                employeeId !== null &&
+                                record.mutate({
+                                  empId: employeeId,
+                                  resourceId: resource.id,
+                                  viewed: true,
+                                  surveyCompleted: !(
+                                    mine?.surveyCompleted ?? false
+                                  ),
+                                })
+                              }
+                            >
+                              <Check className="size-3.5" aria-hidden="true" />
+
+                              {mine?.surveyCompleted
+                                ? t("resource.surveyDone")
+                                : t("resource.markSurveyDone")}
+                            </Button>
+                          ) : null}
+
+                          {isAdmin ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={remove.isPending}
+                              onClick={() => {
+                                if (confirm(t("resource.confirmDelete"))) {
+                                  remove.mutate(resource.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="size-3.5" aria-hidden="true" />
+                            </Button>
+                          ) : null}
+                        </div>
+
+                        {isAdmin ? (
+                          <Readership
+                            stats={statsByResource.get(resource.id)}
                           />
-                        )}
-
-                        {isFile && downloadingId === resource.id
-                          ? t('resource.downloading')
-                          : t(labelKey)}
-                      </Button>
-
-                      {isSurvey && !isAdmin ? (
-                        <Button
-                          type="button"
-                          variant={
-                            mine?.surveyCompleted ? 'primary' : 'secondary'
-                          }
-                          size="sm"
-                          disabled={
-                            employeeId === null || record.isPending
-                          }
-                          onClick={() =>
-                            employeeId !== null &&
-                            record.mutate({
-                              empId: employeeId,
-                              resourceId: resource.id,
-                              viewed: true,
-                              surveyCompleted: !(
-                                mine?.surveyCompleted ?? false
-                              ),
-                            })
-                          }
-                        >
-                          <Check
-                            className="size-3.5"
-                            aria-hidden="true"
-                          />
-
-                          {mine?.surveyCompleted
-                            ? t('resource.surveyDone')
-                            : t('resource.markSurveyDone')}
-                        </Button>
-                      ) : null}
-
-                      {isAdmin ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          disabled={remove.isPending}
-                          onClick={() => {
-                            if (confirm(t('resource.confirmDelete'))) {
-                              remove.mutate(resource.id)
-                            }
-                          }}
-                        >
-                          <Trash2
-                            className="size-3.5"
-                            aria-hidden="true"
-                          />
-                        </Button>
-                      ) : null}
-                    </div>
-
-                    {isAdmin ? (
-                      <Readership
-                        stats={statsByResource.get(resource.id)}
-                      />
-                    ) : null}
-                  </CardBody>
-                </Card>
-              )
-            })}
-          </div>
-        )}
+                        ) : null}
+                      </CardBody>
+                    </Card>
+                  );
+                })}
+              </div>
+              <Pagination
+                page={currentPage}
+                totalPages={totalPages}
+                totalCount={filtered.length}
+                onChange={setPage}
+              />
+            </div>
+          );
+        }}
       </StateBoundary>
     </div>
-  )
+  );
 }

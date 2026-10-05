@@ -1830,6 +1830,22 @@
                         "type": "string"
                       }
                     }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "isNews": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "isLecture": {
+                        "type": "boolean"
+                      }
+                    }
                   }
                 ]
               }
@@ -4190,6 +4206,14 @@
               "null",
               "string"
             ]
+          },
+          "isNews": {
+            "type": "boolean",
+            "default": false
+          },
+          "isLecture": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -4882,6 +4906,18 @@
               "null",
               "string"
             ]
+          },
+          "isNews": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "isLecture": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           }
         }
       },
@@ -5110,6 +5146,8 @@
           "url",
           "type",
           "description",
+          "isNews",
+          "isLecture",
           "uploadedAt"
         ],
         "type": "object",
@@ -5139,6 +5177,12 @@
               "null",
               "string"
             ]
+          },
+          "isNews": {
+            "type": "boolean"
+          },
+          "isLecture": {
+            "type": "boolean"
           },
           "uploadedAt": {
             "type": "string",
@@ -5745,14 +5789,6 @@
             "type": "string"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "Bearer": {
-        "type": "http",
-        "description": "Paste only the JWT token. Example: eyJhbGciOi...",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
       }
     }
   },
