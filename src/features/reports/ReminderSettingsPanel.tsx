@@ -45,7 +45,10 @@ export function ReminderSettingsPanel({ report }: { report: RiskReport }) {
                 type="email"
                 value={email}
                 aria-label={t('report.riskOwnerNumber', { number: index + 1 })}
-                onChange={(event) => setOwners((current) => current.map((value, ownerIndex) => ownerIndex === index ? event.currentTarget.value : value))}
+                onChange={(event) => {
+                  const value = event.currentTarget.value
+                  setOwners((current) => current.map((owner, ownerIndex) => ownerIndex === index ? value : owner))
+                }}
               />
               {owners.length > 1 ? (
                 <Button type="button" variant="ghost" size="sm" aria-label={t('report.removeOwner')} onClick={() => setOwners((current) => current.filter((_, ownerIndex) => ownerIndex !== index))}>
