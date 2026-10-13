@@ -2795,6 +2795,7 @@ export interface components {
             /** Format: int64 */
             empId: number | string;
             category: string;
+            subCategory?: null | string;
             evaluation: components["schemas"]["CreateEvaluationRequestDto"];
             cause: string;
             consequences: string;

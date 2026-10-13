@@ -93,7 +93,11 @@ function ReportDetail({ report }: { report: RiskReport }) {
             {report.subCategory ? (
               <Detail
                 label={t("report.subcategory")}
-                value={report.subCategory.nameEn}
+                value={
+                  i18n.language.startsWith("ar")
+                    ? report.subCategory.nameAr
+                    : report.subCategory.nameEn
+                }
               />
             ) : null}
             <Detail

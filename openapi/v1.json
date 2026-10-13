@@ -4282,6 +4282,12 @@
           "category": {
             "type": "string"
           },
+          "subCategory": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "evaluation": {
             "$ref": "#/components/schemas/CreateEvaluationRequestDto"
           },

@@ -107,6 +107,7 @@ export function useReportHistory(reportId: number, page = 1) {
 export interface CreateReportInput {
   empId: number
   category: RiskCategory
+  subCategory: string | null
   cause: string
   consequences: string
   assignedDepartment: string | null
@@ -136,6 +137,7 @@ export function useCreateReport() {
           body: {
             empId: input.empId,
             category: input.category,
+            subCategory: input.subCategory,
             cause: input.cause,
             consequences: input.consequences,
             assignedDepartment: input.assignedDepartment,

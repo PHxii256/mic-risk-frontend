@@ -26,11 +26,13 @@ export function DownloadableCard({
   children,
   bodyClassName,
   actions,
+  className,
 }: {
   title: string
   children: ReactNode
   bodyClassName?: string
   actions?: ReactNode
+  className?: string
 }) {
   const { t } = useTranslation()
   const captureRef = useRef<HTMLDivElement>(null)
@@ -46,6 +48,8 @@ export function DownloadableCard({
 
       const blob = await toBlob(captureRef.current, {
         pixelRatio: 2,
+        // Include horizontally scrollable chart content in the downloaded image.
+        width: Math.max(captureRef.current.clientWidth, captureRef.current.scrollWidth),
         backgroundColor: getComputedStyle(document.body).backgroundColor,
         filter: (node) =>
           !(node instanceof HTMLElement && node.dataset.excludeFromImage === 'true'),
@@ -58,7 +62,7 @@ export function DownloadableCard({
   }
 
   return (
-    <Card ref={captureRef} className="group relative">
+    <Card ref={captureRef} className={cn('group relative', className)}>
       <CardHeader className="flex flex-wrap items-center justify-between gap-2">
         <CardTitle>{title}</CardTitle>
 

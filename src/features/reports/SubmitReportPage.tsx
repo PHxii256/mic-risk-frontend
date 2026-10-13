@@ -3,7 +3,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import { ApiError } from "@/api/errors";
@@ -28,11 +28,17 @@ import { useEmailReminderTemplates } from "@/features/admin/hooks";
 
 import { EvaluationFields } from "./evaluationFields";
 import { evaluationSchema, UNSET_PRIORITY } from "./evaluationSchema";
-import { useCreateReport } from "./hooks/queries";
+import { useCreateReport, useRiskCategories } from "./hooks/queries";
 
 function reportSchema(isAdmin: boolean) {
   return evaluationSchema.extend({
     category: z.enum(RISK_CATEGORIES),
+    subCategoryId: z.preprocess(
+      (value) => (value === "" || value === null ? null : Number(value)),
+      z.number().int().positive({
+        message: "Subcategory is required",
+      }),
+    ),
     cause: z.string().trim().min(1),
     consequences: z.string().trim().min(1),
     dueDate: isAdmin ? z.string().min(1) : z.string(),
@@ -50,13 +56,14 @@ function reportSchema(isAdmin: boolean) {
 type FormValues = z.input<ReturnType<typeof reportSchema>>;
 
 export function SubmitReportPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const employeeId = useCurrentEmployeeId();
   const isAdmin = useIsAdmin();
   const schema = reportSchema(isAdmin);
   const templates = useEmailReminderTemplates({ enabled: isAdmin });
   const createReport = useCreateReport();
+  const categories = useRiskCategories();
   const [templatesOpen, setTemplatesOpen] = useState(false);
 
   const {
@@ -65,10 +72,12 @@ export function SubmitReportPage() {
     handleSubmit,
     watch,
     formState: { errors },
+    setValue,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       category: "" as unknown as (typeof RISK_CATEGORIES)[number],
+      subCategoryId: null,
       cause: "",
       consequences: "",
       dueDate: defaultDueDate(),
@@ -84,6 +93,23 @@ export function SubmitReportPage() {
     },
   });
   const owners = useFieldArray({ control, name: "owners" });
+  const selectedCategory = watch("category");
+  const selectedSubcategoryId = watch("subCategoryId");
+  const subcategories = useMemo(
+    () =>
+      categories.data?.find((group) => group.category === selectedCategory)?.subcategories ??
+      [],
+    [categories.data, selectedCategory],
+  );
+
+  useEffect(() => {
+    if (
+      selectedSubcategoryId !== null &&
+      !subcategories.some((subcategory) => subcategory.id === Number(selectedSubcategoryId))
+    ) {
+      setValue("subCategoryId", null);
+    }
+  }, [selectedCategory, selectedSubcategoryId, setValue, subcategories]);
 
   // Scores are previewed live from the same formulas the server uses, so the reporter can see
   // what their ratings amount to before submitting.
@@ -102,6 +128,8 @@ export function SubmitReportPage() {
       {
         empId: employeeId,
         category: parsed.category,
+        subCategory:
+          subcategories.find((subcategory) => subcategory.id === parsed.subCategoryId)?.nameEn ?? null,
         cause: parsed.cause,
         consequences: parsed.consequences,
         assignedDepartment: null,
@@ -152,6 +180,34 @@ export function SubmitReportPage() {
                 {RISK_CATEGORIES.map((category) => (
                   <option key={category} value={category}>
                     {t(`riskCategory.${category}`)}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
+            <Field
+              htmlFor="subCategoryId"
+              label={t("report.subcategory")}
+              required
+              error={errors.subCategoryId ? t("form.required") : undefined}
+            >
+              <Select
+                id="subCategoryId"
+                aria-required="true"
+                aria-invalid={errors.subCategoryId ? true : undefined}
+                disabled={!selectedCategory || categories.isPending || subcategories.length === 0}
+                {...register("subCategoryId")}
+              >
+                <option value="">
+                  {categories.isPending
+                    ? t("form.loading")
+                    : t("form.selectPlaceholder")}
+                </option>
+                {subcategories.map((subcategory) => (
+                  <option key={subcategory.id} value={subcategory.id}>
+                    {i18n.language.startsWith("ar")
+                      ? subcategory.nameAr
+                      : subcategory.nameEn}
                   </option>
                 ))}
               </Select>

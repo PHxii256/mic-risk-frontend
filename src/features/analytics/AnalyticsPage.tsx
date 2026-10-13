@@ -317,6 +317,7 @@ function Dashboard({ data }: { data: AnalyticsDashboard }) {
             label: m.departmentName,
             count: m.maturityScore,
           }))}
+          className="lg:col-span-2"
         />
       </div>
     </div>
@@ -400,11 +401,19 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
   )
 }
 
-function ChartCard({ title, data }: { title: string; data: CountByLabel[] }) {
+function ChartCard({
+  title,
+  data,
+  className,
+}: {
+  title: string
+  data: CountByLabel[]
+  className?: string
+}) {
   const { t } = useTranslation()
 
   return (
-    <DownloadableCard title={title}>
+    <DownloadableCard title={title} className={className}>
       {data.length === 0 ? (
         <p className="text-sm text-ink-subtle">{t('state.empty')}</p>
       ) : (
@@ -416,38 +425,41 @@ function ChartCard({ title, data }: { title: string; data: CountByLabel[] }) {
 
 function SimpleBarChart({ data }: { data: CountByLabel[] }) {
   const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+  const chartMinWidth = Math.max(640, data.length * 120)
 
   return (
-    <div className="h-56 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
-          {/* Reversed under RTL so categories read in the same direction as the text. */}
-          <XAxis
-            dataKey="label"
-            reversed={isRtl}
-            tick={{ fontSize: 11, fill: 'var(--color-ink-muted)' }}
-            interval={0}
-            angle={-20}
-            textAnchor="end"
-            height={50}
-          />
-          <YAxis
-            orientation={isRtl ? 'right' : 'left'}
-            tick={{ fontSize: 11, fill: 'var(--color-ink-muted)' }}
-            allowDecimals={false}
-            width={32}
-          />
-          <Tooltip
-            contentStyle={{
-              fontSize: 12,
-              borderRadius: 4,
-              border: '1px solid var(--color-border-subtle)',
-            }}
-          />
-          <Bar dataKey="count" fill="var(--color-accent)" radius={[2, 2, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="overflow-x-auto" role="region" aria-label="Chart">
+      <div className="h-64 w-full" style={{ minWidth: `${chartMinWidth}px` }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 4, right: 12, bottom: 8, left: 12 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
+            {/* Reversed under RTL so categories read in the same direction as the text. */}
+            <XAxis
+              dataKey="label"
+              reversed={isRtl}
+              tick={{ fontSize: 11, fill: 'var(--color-ink-muted)' }}
+              interval={0}
+              angle={-35}
+              textAnchor="end"
+              height={76}
+            />
+            <YAxis
+              orientation={isRtl ? 'right' : 'left'}
+              tick={{ fontSize: 11, fill: 'var(--color-ink-muted)' }}
+              allowDecimals={false}
+              width={32}
+            />
+            <Tooltip
+              contentStyle={{
+                fontSize: 12,
+                borderRadius: 4,
+                border: '1px solid var(--color-border-subtle)',
+              }}
+            />
+            <Bar dataKey="count" fill="var(--color-accent)" radius={[2, 2, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }
