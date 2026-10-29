@@ -15,12 +15,18 @@ import type { RiskReport } from "@/domain/report";
 import { formatDateTime } from "@/lib/format";
 
 import { ReportActionsPanel } from "@/features/admin/ReportActions";
+import { useDepartments } from "@/features/admin/hooks";
 import { useIsAdmin } from "@/features/auth/useSession";
 
 import { EvaluationPanel } from "./EvaluationPanel";
 import { StatusControl } from "./StatusControl";
 import { ReminderSettingsPanel } from "./ReminderSettingsPanel";
-import { useReport, useReportHistory } from "./hooks/queries";
+import {
+  useReport,
+  useReportHistory,
+  useReassignReportDepartment,
+} from "./hooks/queries";
+import { AssignedDepartmentSelect } from "./AssignedDepartmentSelect";
 
 export function ReportDetailPage() {
   const { t } = useTranslation();
@@ -56,6 +62,8 @@ export function ReportDetailPage() {
 function ReportDetail({ report }: { report: RiskReport }) {
   const { t, i18n } = useTranslation();
   const isAdmin = useIsAdmin();
+  const departments = useDepartments({ enabled: isAdmin });
+  const reassign = useReassignReportDepartment();
 
   return (
     <div className="space-y-4">
@@ -113,7 +121,32 @@ function ReportDetail({ report }: { report: RiskReport }) {
               label={t("report.dueDate")}
               value={formatDateTime(report.dueDate, i18n.language)}
             />
+            {report.assignedDepartment ? (
+              <>
+                <Detail label={`${t("report.assignedDepartment")} ID`} value={String(report.assignedDepartment.id)} />
+                <Detail label={t("department.name")} value={report.assignedDepartment.name} />
+                <Detail label={t("department.branch")} value={report.assignedDepartment.branchLocation} />
+              </>
+            ) : null}
           </dl>
+          {isAdmin ? (
+            <div className="max-w-sm">
+              <label htmlFor="report-department" className="text-xs font-medium text-ink-muted">
+                {t("report.assignedDepartment")}
+              </label>
+              <AssignedDepartmentSelect
+                id="report-department"
+                value={report.assignedDepartment?.id ?? null}
+                departments={departments.data ?? []}
+                disabled={departments.isPending || reassign.isPending}
+                onChange={(departmentId) => {
+                  if (departmentId !== null) {
+                    reassign.mutate({ reportId: report.id, departmentId })
+                  }
+                }}
+              />
+            </div>
+          ) : null}
         </CardBody>
       </Card>
 

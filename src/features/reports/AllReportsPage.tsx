@@ -16,6 +16,7 @@ import { EmptyState, StateBoundary } from "@/components/app/StateBoundary";
 import { Button, Input, Select } from "@/components/ui/primitives";
 import { REPORT_STATUSES, type ReportStatus } from "@/domain/report";
 import { useAllReports } from "@/features/admin/hooks";
+import { useDepartments } from "@/features/admin/hooks";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,11 @@ export function AllReportsPage() {
     : "submittedAt";
   const sortDir: "asc" | "desc" =
     params.get("sortDir") === "asc" ? "asc" : "desc";
+  const departmentIdParam = Number(params.get("departmentId"));
+  const departmentId = Number.isInteger(departmentIdParam) && departmentIdParam > 0
+    ? departmentIdParam
+    : null;
+  const departments = useDepartments();
 
   // Typing is debounced into the URL so each keystroke does not become a request.
   const [draft, setDraft] = useState(search);
@@ -66,12 +72,13 @@ export function AllReportsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft]);
 
-  const query = useAllReports(status, page, search, sortBy, sortDir);
+  const query = useAllReports(status, page, search, sortBy, sortDir, departmentId);
 
   function update(next: {
     status?: string | null;
     q?: string | null;
     page?: number;
+    departmentId?: number | null;
     sortBy?: SortKey;
     sortDir?: "asc" | "desc";
   }) {
@@ -82,6 +89,7 @@ export function AllReportsPage() {
       q: next.q,
       sortBy: next.sortBy,
       sortDir: next.sortDir,
+      departmentId: next.departmentId,
     })) {
       if (value === undefined) continue;
       if (value) draftParams.set(key, String(value));
@@ -93,6 +101,7 @@ export function AllReportsPage() {
       next.status !== undefined ||
       next.q !== undefined ||
       next.sortBy !== undefined
+      || next.departmentId !== undefined
     ) {
       draftParams.delete("page");
     }
@@ -151,6 +160,29 @@ export function AllReportsPage() {
           </Select>
         </label>
 
+        <label className="flex items-center gap-2 text-xs text-ink-muted">
+          {t("report.assignedDepartment")}
+          <Select
+            className="w-48"
+            value={departmentId ?? ""}
+            disabled={departments.isPending}
+            onChange={(event) =>
+              update({
+                departmentId: event.currentTarget.value
+                  ? Number(event.currentTarget.value)
+                  : null,
+              })
+            }
+          >
+            <option value="">{t("report.allDepartments")}</option>
+            {departments.data?.map((department) => (
+              <option key={department.id} value={department.id}>
+                {department.name} ({department.branchLocation})
+              </option>
+            ))}
+          </Select>
+        </label>
+
         <Button
           type="button"
           variant="secondary"
@@ -175,11 +207,11 @@ export function AllReportsPage() {
           )}
         </Button>
 
-        {search || status ? (
+        {search || status || departmentId ? (
           <Button
             type="button"
             variant="ghost"
-            onClick={() => update({ q: null, status: null })}
+            onClick={() => update({ q: null, status: null, departmentId: null })}
           >
             <X className="size-3.5" aria-hidden="true" />
             {t("report.clearFilters")}
@@ -215,6 +247,7 @@ export function AllReportsPage() {
                   dir={sortDir}
                   onSort={toggleSort}
                 />
+                <SortableTh label={t("report.assignedDepartment")} />
                 <SortableTh
                   label={t("scoring.inherentRisk")}
                   sortKey="inherentRisk"
@@ -257,12 +290,19 @@ export function AllReportsPage() {
                     </Td>
                     <Td className="whitespace-nowrap text-ink-muted">
                       {report.reporter.name}
-                      <span className="block text-xs text-ink-subtle">
-                        {report.reporter.department.name}
-                      </span>
                     </Td>
                     <Td className="text-ink-muted">
                       {t(`riskCategory.${report.category}`)}
+                    </Td>
+                    <Td className="text-ink-muted">
+                      {report.assignedDepartment ? (
+                        <>
+                          <span className="block">{report.assignedDepartment.name}</span>
+                          <span className="text-xs text-ink-subtle">{report.assignedDepartment.branchLocation}</span>
+                        </>
+                      ) : (
+                        t("report.unassignedDepartment")
+                      )}
                     </Td>
                     <Td>
                       <RiskScore

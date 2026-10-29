@@ -164,15 +164,28 @@ function describe(
     }
 
     if (error.traceId) {
-      console.error(
-        `[api] ${error.status} traceId=${error.traceId}`,
-        error.detail,
-      );
+      console.error(`[api] ${error.status} traceId=${error.traceId}`, {
+        title: error.title,
+        detail: error.detail,
+        errors: error.fieldErrors,
+      });
     }
 
+    const validationMessages = error.fieldErrors
+      ? Object.values(error.fieldErrors).flat()
+      : [];
+    const details = [
+      error.title,
+      error.detail,
+      ...validationMessages,
+      error.traceId ? `traceId: ${error.traceId}` : null,
+    ].filter((value, index, values): value is string =>
+      value !== null && values.indexOf(value) === index,
+    );
+
     return {
-      title: t("state.errorTitle"),
-      body: error.detail ?? t("state.errorTitle"),
+      title: error.title ?? t("state.errorTitle"),
+      body: details.join(" ") || t("state.errorTitle"),
       canRetry: error.isRetryable,
     };
   }

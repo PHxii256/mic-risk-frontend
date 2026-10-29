@@ -11,6 +11,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { AllReportsPage } from '@/features/reports/AllReportsPage'
 import { MyReportsPage } from '@/features/reports/MyReportsPage'
+import { DepartmentReportsPage } from '@/features/reports/DepartmentReportsPage'
 import { ReportDetailPage } from '@/features/reports/ReportDetailPage'
 import { SubmitReportPage } from '@/features/reports/SubmitReportPage'
 import { ResourcesPage } from '@/features/resources/ResourcesPage'
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
 
               // Available to everyone.
               { path: 'reports', element: <MyReportsPage /> },
+              { path: 'reports/department', element: <DepartmentReportsPage /> },
               { path: 'reports/new', element: <SubmitReportPage /> },
               { path: 'reports/:reportId', element: <ReportDetailPage /> },
               { path: 'resources', element: <ResourcesPage /> },

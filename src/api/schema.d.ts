@@ -1834,6 +1834,7 @@ export interface paths {
             parameters: {
                 query?: {
                     status?: string;
+                    departmentId?: number | string;
                     page?: number | string;
                     pageSize?: number | string;
                     search?: string;
@@ -1960,6 +1961,47 @@ export interface paths {
                         "text/plain": components["schemas"]["ProblemDetails"];
                         "application/json": components["schemas"]["ProblemDetails"];
                         "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/risk-report/department": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number | string;
+                    pageSize?: number | string;
+                    status?: string;
+                    search?: string;
+                    sortBy?: string;
+                    sortDir?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "text/plain": components["schemas"]["PagedResultDtoOfRiskReportResponseDto"];
+                        "application/json": components["schemas"]["PagedResultDtoOfRiskReportResponseDto"];
+                        "text/json": components["schemas"]["PagedResultDtoOfRiskReportResponseDto"];
                     };
                 };
             };
@@ -2802,7 +2844,7 @@ export interface components {
             /** Format: date-time */
             dueDate: null | string;
             ownerEmails: null | string[];
-            assignedDepartment: null | string;
+            departmentId?: null | number | string;
             /** @default true */
             sendReminderEmails: boolean;
             /** Format: int64 */
@@ -3077,7 +3119,7 @@ export interface components {
             auditorEvaluation: null | components["schemas"]["RiskReportEvaluationResponseDto"];
             cause: string;
             consequences: string;
-            assignedDepartment: null | string;
+            assignedDepartment: null | components["schemas"]["DepartmentResponseDto"];
             status: string;
             /** Format: date-time */
             submittedAt: string;
@@ -3136,7 +3178,7 @@ export interface components {
             status: string;
         };
         UpdateRiskDepartmentRequestDto: {
-            assignedDepartment: null | string;
+            departmentId: number | string;
         };
         UpdateRiskReminderSettingsRequestDto: {
             /** Format: date-time */

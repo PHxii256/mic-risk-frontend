@@ -1,8 +1,9 @@
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { StatusBadge } from "@/components/app/RiskBadge";
+import { Pagination } from "@/components/app/DataTable";
 import {
   EmptyStateTemplate,
   StateBoundary,
@@ -12,11 +13,13 @@ import { Card, Skeleton } from "@/components/ui/primitives";
 import type { RiskReport } from "@/domain/report";
 import { formatDate } from "@/lib/format";
 
-import { useMyReports } from "./hooks/queries";
+import { useMyReportsPage } from "./hooks/queries";
 
 export function MyReportsPage() {
   const { t, i18n } = useTranslation();
-  const query = useMyReports();
+  const [params, setParams] = useSearchParams();
+  const page = Math.max(1, Number(params.get("page") ?? "1") || 1);
+  const query = useMyReportsPage(page);
   const navigate = useNavigate();
 
   return (
@@ -37,7 +40,7 @@ export function MyReportsPage() {
         data={query.data}
         onRetry={() => void query.refetch()}
         skeleton={<TableSkeleton />}
-        isEmpty={(reports) => reports.length === 0}
+        isEmpty={(result) => result.items.length === 0}
         empty={
           <EmptyStateTemplate
             message1={t("state.emptyReports1")}
@@ -47,13 +50,28 @@ export function MyReportsPage() {
           />
         }
       >
-        {(reports) => <ReportsTable reports={reports} locale={i18n.language} />}
+        {(result) => (
+          <>
+            <ReportsTable reports={result.items} locale={i18n.language} />
+            <Pagination
+              page={result.page}
+              totalPages={result.totalPages}
+              totalCount={result.totalCount}
+              isFetching={query.isFetching}
+              onChange={(next) => {
+                const nextParams = new URLSearchParams(params);
+                nextParams.set("page", String(next));
+                setParams(nextParams);
+              }}
+            />
+          </>
+        )}
       </StateBoundary>
     </div>
   );
 }
 
-function ReportsTable({
+export function ReportsTable({
   reports,
   locale,
 }: {
@@ -70,6 +88,7 @@ function ReportsTable({
             <tr className="border-b border-border-subtle bg-surface-muted text-xs text-ink-muted">
               <Th>{t("report.cause")}</Th>
               <Th>{t("report.category")}</Th>
+              <Th>{t("report.assignedDepartment")}</Th>
               <Th>{t("report.status")}</Th>
               <Th>{t("report.submittedAt")}</Th>
             </tr>
@@ -90,6 +109,16 @@ function ReportsTable({
                 </Td>
                 <Td className="text-ink-muted">
                   {t(`riskCategory.${report.category}`)}
+                </Td>
+                <Td className="text-ink-muted">
+                  {report.assignedDepartment ? (
+                    <>
+                      <span className="block">#{report.assignedDepartment.id} {report.assignedDepartment.name}</span>
+                      <span className="text-xs text-ink-subtle">{report.assignedDepartment.branchLocation}</span>
+                    </>
+                  ) : (
+                    t("report.unassignedDepartment")
+                  )}
                 </Td>
                 <Td>
                   <StatusBadge status={report.status} />

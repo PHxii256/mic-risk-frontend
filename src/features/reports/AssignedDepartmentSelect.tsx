@@ -1,17 +1,19 @@
 import { useTranslation } from 'react-i18next'
 
 import { Select } from '@/components/ui/primitives'
-import { ASSIGNED_DEPARTMENTS } from '@/domain/assignedDepartments'
+import type { Department } from '@/domain/report'
 
 export function AssignedDepartmentSelect({
   id,
   value,
+  departments,
   onChange,
   disabled,
 }: {
   id: string
-  value: string
-  onChange: (value: string) => void
+  value: number | null
+  departments: Department[]
+  onChange: (value: number | null) => void
   disabled?: boolean
 }) {
   const { t } = useTranslation()
@@ -19,14 +21,14 @@ export function AssignedDepartmentSelect({
   return (
     <Select
       id={id}
-      value={value}
+      value={value ?? ''}
       disabled={disabled}
-      onChange={(event) => onChange(event.currentTarget.value)}
+      onChange={(event) => onChange(event.currentTarget.value ? Number(event.currentTarget.value) : null)}
     >
       <option value="">{t('report.unassignedDepartment')}</option>
-      {ASSIGNED_DEPARTMENTS.map((department) => (
-        <option key={department.id} value={department.value}>
-          {t(`assignedDepartments.${department.id}`)}
+      {departments.map((department) => (
+        <option key={department.id} value={department.id}>
+          {department.name} ({department.branchLocation})
         </option>
       ))}
     </Select>

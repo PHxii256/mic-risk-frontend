@@ -99,6 +99,7 @@ export interface RiskReport {
   lastReminderSentAt: Date | null
   reminderTemplateId: number | null
   ownerEmails: string[]
+  assignedDepartment: Department | null
   /** The auditor's assessment supersedes the reporter's wherever one exists. */
   effectiveEvaluation: Evaluation
 }
@@ -199,6 +200,7 @@ export function mapReport(dto: ReportDto): RiskReport {
         ? null
         : toInteger(dto.reminderTemplateId, 'report.reminderTemplateId'),
     ownerEmails: dto.ownerEmails,
+    assignedDepartment: dto.assignedDepartment ? mapDepartment(dto.assignedDepartment) : null,
     effectiveEvaluation: auditorEvaluation ?? reportedEvaluation,
   }
 }

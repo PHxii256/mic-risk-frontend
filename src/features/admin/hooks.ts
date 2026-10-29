@@ -59,15 +59,17 @@ export function useAllReports(
   search = '',
   sortBy = 'submittedAt',
   sortDir: 'asc' | 'desc' = 'desc',
+  departmentId: number | null = null,
 ) {
   return useQuery({
-    queryKey: keys.reports(status, page, search, sortBy, sortDir),
+    queryKey: [...keys.reports(status, page, search, sortBy, sortDir), departmentId],
     queryFn: async ({ signal }) => {
       const data = await unwrap(
         api.GET('/api/risk-report', {
           params: {
             query: {
               ...(status ? { status } : {}),
+              ...(departmentId !== null ? { departmentId } : {}),
               ...(search ? { search } : {}),
               page,
               pageSize: 20,
@@ -293,9 +295,10 @@ export function useDeleteEmailReminderTemplate() {
 
 /* ------------------------------------------------------------------ departments */
 
-export function useDepartments() {
+export function useDepartments(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: keys.departments,
+    enabled: options.enabled ?? true,
     queryFn: async ({ signal }): Promise<Department[]> => {
       const data = await unwrap(api.GET('/api/department', { signal }))
       return data.map(mapDepartment)

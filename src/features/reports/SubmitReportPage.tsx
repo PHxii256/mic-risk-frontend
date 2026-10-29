@@ -6,7 +6,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
-import { ApiError } from "@/api/errors";
+import { ApiError, flattenFieldErrors } from "@/api/errors";
 import { RiskScore } from "@/components/app/RiskBadge";
 import {
   Button,
@@ -24,7 +24,7 @@ import { useCurrentEmployeeId, useIsAdmin } from "@/features/auth/useSession";
 import { inherentRisk, residualRisk, riskBand } from "@/domain/scoring";
 import { RISK_CATEGORIES } from "@/domain/report";
 import { EmailTemplatesDialog } from "@/features/admin/EmailTemplatesPage";
-import { useEmailReminderTemplates } from "@/features/admin/hooks";
+import { useDepartments, useEmailReminderTemplates } from "@/features/admin/hooks";
 
 import { EvaluationFields } from "./evaluationFields";
 import { evaluationSchema, UNSET_PRIORITY } from "./evaluationSchema";
@@ -49,6 +49,10 @@ function reportSchema(isAdmin: boolean) {
     reminderTemplateId: z.preprocess(
       (value) => (value === "" || value === null ? null : Number(value)),
       z.number().int().positive().nullable(),
+    ),
+    departmentId: z.preprocess(
+      (value) => (value === "" || value === null ? null : Number(value)),
+      isAdmin ? z.number().int().positive() : z.number().int().positive().nullable(),
     ),
   });
 }
@@ -84,6 +88,7 @@ export function SubmitReportPage() {
       owners: [{ email: "@mohins.com" }],
       sendReminderEmails: true,
       reminderTemplateId: null,
+      departmentId: null,
       severity: 3,
       frequency: 3,
       controlEffectiveness: 3,
@@ -93,6 +98,7 @@ export function SubmitReportPage() {
     },
   });
   const owners = useFieldArray({ control, name: "owners" });
+  const departments = useDepartments({ enabled: isAdmin });
   const selectedCategory = watch("category");
   const selectedSubcategoryId = watch("subCategoryId");
   const subcategories = useMemo(
@@ -100,6 +106,9 @@ export function SubmitReportPage() {
       categories.data?.find((group) => group.category === selectedCategory)?.subcategories ??
       [],
     [categories.data, selectedCategory],
+  );
+  const selectedSubcategory = subcategories.find(
+    (subcategory) => subcategory.id === Number(selectedSubcategoryId),
   );
 
   useEffect(() => {
@@ -128,11 +137,14 @@ export function SubmitReportPage() {
       {
         empId: employeeId,
         category: parsed.category,
-        subCategory:
-          subcategories.find((subcategory) => subcategory.id === parsed.subCategoryId)?.nameEn ?? null,
+        subCategory: selectedSubcategory
+          ? i18n.language.startsWith("ar")
+            ? selectedSubcategory.nameAr
+            : selectedSubcategory.nameEn
+          : null,
         cause: parsed.cause,
         consequences: parsed.consequences,
-        assignedDepartment: null,
+        departmentId: isAdmin ? parsed.departmentId : undefined,
         dueDate: new Date(`${parsed.dueDate}T23:59:59`).toISOString(),
         ownerEmails: isAdmin ? parsed.owners.map((owner) => owner.email) : [],
         sendReminderEmails: isAdmin ? parsed.sendReminderEmails : false,
@@ -280,6 +292,28 @@ export function SubmitReportPage() {
             </CardHeader>
             <CardBody className="space-y-4">
               <Field
+                htmlFor="departmentId"
+                label={t("report.assignedDepartment")}
+                required
+                error={errors.departmentId ? t("form.required") : undefined}
+              >
+                <Select
+                  id="departmentId"
+                  aria-required="true"
+                  aria-invalid={errors.departmentId ? true : undefined}
+                  disabled={departments.isPending}
+                  {...register("departmentId")}
+                >
+                  <option value="">{t("form.selectPlaceholder")}</option>
+                  {departments.data?.map((department) => (
+                    <option key={department.id} value={department.id}>
+                      {department.name} ({department.branchLocation})
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field
                 htmlFor="dueDate"
                 label={t("report.dueDate")}
                 hint={t("report.dueDateHint")}
@@ -387,14 +421,7 @@ export function SubmitReportPage() {
         ) : null}
 
         {createReport.isError ? (
-          <p
-            className="rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger"
-            role="alert"
-          >
-            {createReport.error instanceof ApiError
-              ? (createReport.error.detail ?? t("state.errorTitle"))
-              : t("state.errorTitle")}
-          </p>
+          <CreationError error={createReport.error} fallback={t("state.errorTitle")} />
         ) : null}
 
         <div className="flex justify-end gap-2">
@@ -424,6 +451,41 @@ export function SubmitReportPage() {
       {templatesOpen ? (
         <EmailTemplatesDialog onClose={() => setTemplatesOpen(false)} />
       ) : null}
+    </div>
+  );
+}
+
+function CreationError({
+  error,
+  fallback,
+}: {
+  error: unknown;
+  fallback: string;
+}) {
+  const messages: string[] = [];
+
+  if (error instanceof ApiError) {
+    if (error.title) messages.push(error.title);
+    if (error.detail && error.detail !== error.title) messages.push(error.detail);
+    if (error.fieldErrors) messages.push(...flattenFieldErrors(error.fieldErrors));
+    if (error.traceId) messages.push(`traceId: ${error.traceId}`);
+
+    if (error.traceId) {
+      console.error(`[api] ${error.status} traceId=${error.traceId}`, {
+        title: error.title,
+        detail: error.detail,
+        errors: error.fieldErrors,
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-1 rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger" role="alert">
+      {messages.length > 0 ? (
+        messages.map((message, index) => <p key={`${message}-${index}`}>{message}</p>)
+      ) : (
+        <p>{fallback}</p>
+      )}
     </div>
   );
 }

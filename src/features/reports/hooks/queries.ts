@@ -19,6 +19,8 @@ export const reportKeys = {
   mine: () => [...reportKeys.all, 'mine'] as const,
   detail: (id: number) => [...reportKeys.all, 'detail', id] as const,
   history: (id: number, page: number) => [...reportKeys.all, 'history', id, page] as const,
+  department: (page: number, status: string | null, search: string, sortBy: string, sortDir: string) =>
+    [...reportKeys.all, 'department', page, status, search, sortBy, sortDir] as const,
 }
 
 export const taxonomyKeys = {
@@ -73,6 +75,46 @@ export function useMyReports() {
   })
 }
 
+export function useMyReportsPage(
+  page: number,
+  status: string | null = null,
+  search = '',
+  sortBy = 'submittedAt',
+  sortDir: 'asc' | 'desc' = 'desc',
+) {
+  return useQuery({
+    queryKey: [...reportKeys.mine(), page, status, search, sortBy, sortDir],
+    queryFn: async ({ signal }): Promise<Page<RiskReport>> => {
+      const data = await unwrap(api.GET('/api/risk-report/mine', {
+        params: { query: { page, pageSize: 20, ...(status ? { status } : {}), ...(search ? { search } : {}), sortBy, sortDir } },
+        signal,
+      }))
+      return mapPage(data, mapReport)
+    },
+    placeholderData: (previous) => previous,
+  })
+}
+
+export function useDepartmentReports(
+  page: number,
+  status: string | null = null,
+  search = '',
+  sortBy = 'submittedAt',
+  sortDir: 'asc' | 'desc' = 'desc',
+) {
+  return useQuery({
+    queryKey: reportKeys.department(page, status, search, sortBy, sortDir),
+    queryFn: async ({ signal }): Promise<Page<RiskReport>> => {
+      const data = await unwrap(api.GET('/api/risk-report/department', {
+        params: { query: { page, pageSize: 20, ...(status ? { status } : {}), ...(search ? { search } : {}), sortBy, sortDir } },
+        signal,
+      }))
+      return mapPage(data, mapReport)
+    },
+    placeholderData: (previous) => previous,
+  })
+}
+
 export function useReport(reportId: number) {
   return useQuery({
     queryKey: reportKeys.detail(reportId),
@@ -110,7 +152,7 @@ export interface CreateReportInput {
   subCategory: string | null
   cause: string
   consequences: string
-  assignedDepartment: string | null
+  departmentId?: number | null
   dueDate: string
   ownerEmails: string[]
   sendReminderEmails: boolean
@@ -140,7 +182,7 @@ export function useCreateReport() {
             subCategory: input.subCategory,
             cause: input.cause,
             consequences: input.consequences,
-            assignedDepartment: input.assignedDepartment,
+            ...(input.departmentId !== undefined ? { departmentId: input.departmentId } : {}),
             dueDate: input.dueDate,
             ownerEmails: input.ownerEmails,
             sendReminderEmails: input.sendReminderEmails,
@@ -161,6 +203,23 @@ export function useCreateReport() {
     onSuccess: (report) => {
       queryClient.setQueryData(reportKeys.detail(report.id), report)
       void queryClient.invalidateQueries({ queryKey: reportKeys.mine() })
+    },
+  })
+}
+
+export function useReassignReportDepartment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: ['reports', 'department'],
+    mutationFn: async (input: { reportId: number; departmentId: number }): Promise<RiskReport> =>
+      mapReport(await unwrap(api.PUT('/api/risk-report/{id}/department', {
+        params: { path: { id: input.reportId } },
+        body: { departmentId: input.departmentId },
+      }))),
+    onSuccess: (report) => {
+      queryClient.setQueryData(reportKeys.detail(report.id), report)
+      void queryClient.invalidateQueries({ queryKey: reportKeys.all })
     },
   })
 }

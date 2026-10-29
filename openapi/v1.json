@@ -2514,6 +2514,17 @@
             }
           },
           {
+            "name": "departmentId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int64"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -4266,8 +4277,7 @@
           "cause",
           "consequences",
           "dueDate",
-          "ownerEmails",
-          "assignedDepartment"
+          "ownerEmails"
         ],
         "type": "object",
         "properties": {
@@ -4313,11 +4323,13 @@
               "type": "string"
             }
           },
-          "assignedDepartment": {
+          "departmentId": {
             "type": [
               "null",
+              "integer",
               "string"
-            ]
+            ],
+            "format": "int64"
           },
           "sendReminderEmails": {
             "type": "boolean",
@@ -5497,9 +5509,13 @@
             "type": "string"
           },
           "assignedDepartment": {
-            "type": [
-              "null",
-              "string"
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DepartmentResponseDto"
+              }
             ]
           },
           "status": {
@@ -5721,15 +5737,16 @@
       },
       "UpdateRiskDepartmentRequestDto": {
         "required": [
-          "assignedDepartment"
+          "departmentId"
         ],
         "type": "object",
         "properties": {
-          "assignedDepartment": {
+          "departmentId": {
             "type": [
-              "null",
+              "integer",
               "string"
-            ]
+            ],
+            "format": "int64"
           }
         }
       },

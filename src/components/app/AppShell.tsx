@@ -59,7 +59,7 @@ export function AppShell() {
                 to={home}
                 className="flex items-center gap-2 text-sm font-semibold text-[#255a9f] hover:text-[#ea6530]"
               >
-                <img src="logoonly.svg" alt="logo" className="h-5 pt-[0.5px]" />
+                <img src="/logoonly.svg" alt="logo" className="h-5 pt-[0.5px]" />
                 {t("app.name")}
               </NavLink>
             </div>
@@ -69,6 +69,7 @@ export function AppShell() {
               {isAdmin ? <ShellLink to="/admin">{t("nav.home")}</ShellLink> : null}
 
               <ShellLink to="/reports">{t("nav.myReports")}</ShellLink>
+              {!isAdmin ? <ShellLink to="/reports/department">{t("nav.departmentReports")}</ShellLink> : null}
               <ShellLink to="/resources">{t("nav.resources")}</ShellLink>
 
               {isAdmin ? (
@@ -123,6 +124,11 @@ export function AppShell() {
               <ShellLink to="/reports" onClick={closeMobileMenu}>
                 {t("nav.myReports")}
               </ShellLink>
+              {!isAdmin ? (
+                <ShellLink to="/reports/department" onClick={closeMobileMenu}>
+                  {t("nav.departmentReports")}
+                </ShellLink>
+              ) : null}
               <ShellLink to="/resources" onClick={closeMobileMenu}>
                 {t("nav.resources")}
               </ShellLink>
