@@ -55,9 +55,10 @@ export function AllReportsPage() {
   const sortDir: "asc" | "desc" =
     params.get("sortDir") === "asc" ? "asc" : "desc";
   const departmentIdParam = Number(params.get("departmentId"));
-  const departmentId = Number.isInteger(departmentIdParam) && departmentIdParam > 0
-    ? departmentIdParam
-    : null;
+  const departmentId =
+    Number.isInteger(departmentIdParam) && departmentIdParam > 0
+      ? departmentIdParam
+      : null;
   const departments = useDepartments();
 
   // Typing is debounced into the URL so each keystroke does not become a request.
@@ -72,7 +73,14 @@ export function AllReportsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft]);
 
-  const query = useAllReports(status, page, search, sortBy, sortDir, departmentId);
+  const query = useAllReports(
+    status,
+    page,
+    search,
+    sortBy,
+    sortDir,
+    departmentId,
+  );
 
   function update(next: {
     status?: string | null;
@@ -100,8 +108,8 @@ export function AllReportsPage() {
     if (
       next.status !== undefined ||
       next.q !== undefined ||
-      next.sortBy !== undefined
-      || next.departmentId !== undefined
+      next.sortBy !== undefined ||
+      next.departmentId !== undefined
     ) {
       draftParams.delete("page");
     }
@@ -211,7 +219,9 @@ export function AllReportsPage() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => update({ q: null, status: null, departmentId: null })}
+            onClick={() =>
+              update({ q: null, status: null, departmentId: null })
+            }
           >
             <X className="size-3.5" aria-hidden="true" />
             {t("report.clearFilters")}
@@ -280,14 +290,6 @@ export function AllReportsPage() {
               <tbody>
                 {result.items.map((report) => (
                   <Row key={report.id}>
-                    <Td>
-                      <Link
-                        to={`/reports/${report.id}`}
-                        className="font-medium text-accent hover:underline"
-                      >
-                        {truncate(report.cause)}
-                      </Link>
-                    </Td>
                     <Td className="whitespace-nowrap text-ink-muted">
                       {report.reporter.name}
                     </Td>
@@ -297,8 +299,12 @@ export function AllReportsPage() {
                     <Td className="text-ink-muted">
                       {report.assignedDepartment ? (
                         <>
-                          <span className="block">{report.assignedDepartment.name}</span>
-                          <span className="text-xs text-ink-subtle">{report.assignedDepartment.branchLocation}</span>
+                          <span className="block">
+                            {report.assignedDepartment.name}
+                          </span>
+                          <span className="text-xs text-ink-subtle">
+                            {report.assignedDepartment.branchLocation}
+                          </span>
                         </>
                       ) : (
                         t("report.unassignedDepartment")

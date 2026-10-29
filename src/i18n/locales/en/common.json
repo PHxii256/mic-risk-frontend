@@ -257,7 +257,7 @@
   "department": {
     "add": "Add department",
     "edit": "Edit department",
-    "name": "Name",
+    "name": "Department name",
     "branch": "Branch location"
   },
   "action": {

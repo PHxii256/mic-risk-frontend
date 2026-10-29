@@ -113,8 +113,12 @@ export function ReportsTable({
                 <Td className="text-ink-muted">
                   {report.assignedDepartment ? (
                     <>
-                      <span className="block">#{report.assignedDepartment.id} {report.assignedDepartment.name}</span>
-                      <span className="text-xs text-ink-subtle">{report.assignedDepartment.branchLocation}</span>
+                      <span className="block">
+                        {report.assignedDepartment.name}
+                      </span>
+                      <span className="text-xs text-ink-subtle">
+                        {report.assignedDepartment.branchLocation}
+                      </span>
                     </>
                   ) : (
                     t("report.unassignedDepartment")
