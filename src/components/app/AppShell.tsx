@@ -57,7 +57,7 @@ export function AppShell() {
 
               <NavLink
                 to={home}
-                className="flex items-center gap-2 text-sm font-semibold text-[#255a9f] hover:text-[#ea6530]"
+                className="flex  items-center gap-2 text-sm font-semibold text-[#255a9f] hover:text-[#ea6530]"
               >
                 <img src="/logoonly.svg" alt="logo" className="h-5 pt-[0.5px]" />
                 {t("app.name")}

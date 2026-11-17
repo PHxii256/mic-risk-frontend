@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 
 import {
   HeadRow,
@@ -397,6 +397,3 @@ function SortableTh({
   );
 }
 
-function truncate(text: string, max = 60): string {
-  return text.length <= max ? text : `${text.slice(0, max).trimEnd()}…`;
-}

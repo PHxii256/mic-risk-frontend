@@ -102,14 +102,10 @@ export function SubmitReportPage() {
   const selectedCategory = watch("category");
   const selectedSubcategoryId = watch("subCategoryId");
   const subcategories = useMemo(
-    () =>
-      categories.data?.find((group) => group.category === selectedCategory)?.subcategories ??
-      [],
+    () => categories.data?.find((group) => group.category === selectedCategory)?.subcategories ?? [],
     [categories.data, selectedCategory],
   );
-  const selectedSubcategory = subcategories.find(
-    (subcategory) => subcategory.id === Number(selectedSubcategoryId),
-  );
+  const selectedSubcategory = subcategories.find((subcategory) => subcategory.id === Number(selectedSubcategoryId));
 
   useEffect(() => {
     if (
@@ -153,12 +149,8 @@ export function SubmitReportPage() {
         frequency: parsed.frequency,
         controlEffectiveness: parsed.controlEffectiveness,
         priority: isAdmin ? parsed.priority : UNSET_PRIORITY,
-        existingMeasures: parsed.existingMeasures
-          ? parsed.existingMeasures
-          : null,
-        proposedMeasures: parsed.proposedMeasures
-          ? parsed.proposedMeasures
-          : null,
+        existingMeasures: parsed.existingMeasures ? parsed.existingMeasures : null,
+        proposedMeasures: parsed.proposedMeasures ? parsed.proposedMeasures : null,
       },
       { onSuccess: (report) => void navigate(`/reports/${report.id}`) },
     );
@@ -166,9 +158,7 @@ export function SubmitReportPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <h1 className="text-base font-semibold text-ink">
-        {t("nav.submitReport")}
-      </h1>
+      <h1 className="text-base font-semibold text-ink">{t("nav.submitReport")}</h1>
 
       <form className="space-y-4" noValidate onSubmit={handleSubmit(onSubmit)}>
         <Card>
@@ -210,16 +200,10 @@ export function SubmitReportPage() {
                 disabled={!selectedCategory || categories.isPending || subcategories.length === 0}
                 {...register("subCategoryId")}
               >
-                <option value="">
-                  {categories.isPending
-                    ? t("form.loading")
-                    : t("form.selectPlaceholder")}
-                </option>
+                <option value="">{categories.isPending ? t("form.loading") : t("form.selectPlaceholder")}</option>
                 {subcategories.map((subcategory) => (
                   <option key={subcategory.id} value={subcategory.id}>
-                    {i18n.language.startsWith("ar")
-                      ? subcategory.nameAr
-                      : subcategory.nameEn}
+                    {i18n.language.startsWith("ar") ? subcategory.nameAr : subcategory.nameEn}
                   </option>
                 ))}
               </Select>
@@ -264,23 +248,11 @@ export function SubmitReportPage() {
             <CardTitle>{t("report.evaluation")}</CardTitle>
           </CardHeader>
           <CardBody className="space-y-5">
-            <EvaluationFields
-              control={control}
-              register={register}
-              showPriority={isAdmin}
-            />
+            <EvaluationFields control={control} register={register} showPriority={isAdmin} />
 
             <div className="flex flex-wrap gap-6 rounded-sm bg-surface-muted px-3 py-2.5">
-              <ScorePreview
-                label={t("scoring.inherentRisk")}
-                hint={t("scoring.inherentRiskHint")}
-                score={inherent}
-              />
-              <ScorePreview
-                label={t("scoring.residualRisk")}
-                hint={t("scoring.residualRiskHint")}
-                score={residual}
-              />
+              <ScorePreview label={t("scoring.inherentRisk")} hint={t("scoring.inherentRiskHint")} score={inherent} />
+              <ScorePreview label={t("scoring.residualRisk")} hint={t("scoring.residualRiskHint")} score={residual} />
             </div>
           </CardBody>
         </Card>
@@ -320,33 +292,32 @@ export function SubmitReportPage() {
                 required
                 error={errors.dueDate ? t("form.required") : undefined}
               >
-                <Input
-                  id="dueDate"
-                  type="date"
-                  aria-required="true"
-                  {...register("dueDate")}
-                />
+                <Input id="dueDate" type="date" aria-required="true" {...register("dueDate")} />
               </Field>
 
               <div className="space-y-2">
                 <p className="text-xs font-medium text-ink-muted">
-                  {t("report.riskOwners")}{" "}
-                  <span className="text-danger">*</span>
+                  {t("report.riskOwners")} <span className="text-danger">*</span>
                 </p>
                 {owners.fields.map((field, index) => (
                   <div key={field.id} className="flex gap-2">
+                    {/* type="text" (not "email"): email inputs throw on setSelectionRange. The schema
+                        still validates the address; inputMode keeps the email keyboard on mobile. */}
                     <Input
-                      type="email"
+                      type="text"
+                      inputMode="email"
+                      autoComplete="email"
+                      spellCheck={false}
                       aria-label={t("report.riskOwnerNumber", {
                         number: index + 1,
                       })}
-                      aria-invalid={
-                        errors.owners?.[index]?.email ? true : undefined
-                      }
+                      aria-invalid={errors.owners?.[index]?.email ? true : undefined}
                       {...register(`owners.${index}.email`)}
                       onFocus={(event) => {
-                        if (event.currentTarget.value === "@mohins.com")
-                          event.currentTarget.setSelectionRange(0, 0);
+                        const input = event.currentTarget;
+                        if (input.value !== "@mohins.com") return;
+                        // Defer so a mouse click doesn't move the caret back to where it landed.
+                        requestAnimationFrame(() => input.setSelectionRange(0, 0));
                       }}
                     />
                     {owners.fields.length > 1 ? (
@@ -362,19 +333,14 @@ export function SubmitReportPage() {
                     ) : null}
                   </div>
                 ))}
-                {errors.owners ? (
-                  <p className="text-xs text-danger">
-                    {t("report.validOwnerRequired")}
-                  </p>
-                ) : null}
+                {errors.owners ? <p className="text-xs text-danger">{t("report.validOwnerRequired")}</p> : null}
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
                   onClick={() => owners.append({ email: "@mohins.com" })}
                 >
-                  <Plus className="size-3.5" aria-hidden="true" />{" "}
-                  {t("report.addOwner")}
+                  <Plus className="size-3.5" aria-hidden="true" /> {t("report.addOwner")}
                 </Button>
               </div>
 
@@ -384,58 +350,35 @@ export function SubmitReportPage() {
                 optionalLabel={t("form.optional")}
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  <Select
-                    id="reminderTemplateId"
-                    className="w-auto min-w-0 flex-1"
-                    {...register("reminderTemplateId")}
-                  >
-                    <option value="">
-                      {t("emailTemplate.defaultTemplate")}
-                    </option>
+                  <Select id="reminderTemplateId" className="w-auto min-w-0 flex-1" {...register("reminderTemplateId")}>
+                    <option value="">{t("emailTemplate.defaultTemplate")}</option>
                     {templates.data?.map((template) => (
                       <option key={template.id} value={template.id}>
                         {template.name}
                       </option>
                     ))}
                   </Select>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setTemplatesOpen(true)}
-                  >
+                  <Button type="button" variant="secondary" onClick={() => setTemplatesOpen(true)}>
                     {t("emailTemplate.open")}
                   </Button>
                 </div>
               </Field>
 
               <label className="flex items-center gap-2 text-sm text-ink">
-                <input
-                  type="checkbox"
-                  className="size-4 accent-accent"
-                  {...register("sendReminderEmails")}
-                />
+                <input type="checkbox" className="size-4 accent-accent" {...register("sendReminderEmails")} />
                 {t("report.sendOverdueReminders")}
               </label>
             </CardBody>
           </Card>
         ) : null}
 
-        {createReport.isError ? (
-          <CreationError error={createReport.error} fallback={t("state.errorTitle")} />
-        ) : null}
+        {createReport.isError ? <CreationError error={createReport.error} fallback={t("state.errorTitle")} /> : null}
 
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => void navigate("/reports")}
-          >
+          <Button type="button" variant="secondary" onClick={() => void navigate("/reports")}>
             {t("common.cancel")}
           </Button>
-          <Button
-            type="submit"
-            disabled={createReport.isPending || employeeId === null}
-          >
+          <Button type="submit" disabled={createReport.isPending || employeeId === null}>
             {createReport.isPending ? (
               <>
                 <Spinner />
@@ -448,20 +391,12 @@ export function SubmitReportPage() {
         </div>
       </form>
 
-      {templatesOpen ? (
-        <EmailTemplatesDialog onClose={() => setTemplatesOpen(false)} />
-      ) : null}
+      {templatesOpen ? <EmailTemplatesDialog onClose={() => setTemplatesOpen(false)} /> : null}
     </div>
   );
 }
 
-function CreationError({
-  error,
-  fallback,
-}: {
-  error: unknown;
-  fallback: string;
-}) {
+function CreationError({ error, fallback }: { error: unknown; fallback: string }) {
   const messages: string[] = [];
 
   if (error instanceof ApiError) {
@@ -499,15 +434,7 @@ function defaultDueDate() {
   return `${year}-${month}-${day}`;
 }
 
-function ScorePreview({
-  label,
-  hint,
-  score,
-}: {
-  label: string;
-  hint: string;
-  score: number;
-}) {
+function ScorePreview({ label, hint, score }: { label: string; hint: string; score: number }) {
   return (
     <div>
       <p className="text-xs font-medium text-ink-muted">{label}</p>
